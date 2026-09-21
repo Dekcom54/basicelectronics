@@ -17,7 +17,7 @@
         body { font-family: 'Sarabun', 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .page { display: none; }
         
-        /* --- Cyberpunk Dark Theme Styles --- */
+        /* --- Cyberpunk Theme (Only for Landing Page) --- */
         .cyberpunk-bg {
             background-color: #0b0f19;
             background-image: radial-gradient(circle at 50% 50%, #1a2235 0%, #0b0f19 100%);
@@ -26,13 +26,6 @@
             color: #00f0ff;
             text-shadow: 0 0 10px rgba(0,240,255,0.6);
         }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        /* ---------------------------------- */
 
         .float-up { animation: floatUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; opacity: 0; transform: translateY(40px); }
         .delay-1 { animation-delay: 0.2s; } .delay-2 { animation-delay: 0.4s; }
@@ -86,17 +79,14 @@
             </div>
         </div>
 
-        <!-- 1. Landing Page (Cyberpunk IT Theme) -->
+        <!-- 1. Landing Page (Cyberpunk Theme) -->
         <div id="page-home" class="page w-full min-h-screen cyberpunk-bg flex flex-col relative" style="display: flex;">
-            
-            <!-- Navbar -->
             <div class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto relative z-20">
                 <div class="bg-white p-2 rounded-lg shadow-lg">
                     <img src="./images/Hana Logo.jpg" alt="Hana Logo" class="h-10 md:h-12 object-contain" onerror="this.src='https://placehold.co/150x50?text=HANA+Logo'">
                 </div>
             </div>
 
-            <!-- Hero Content -->
             <div class="flex-1 flex flex-col justify-center items-center text-center px-4 relative z-20">
                 <div class="float-up mb-4">
                     <span class="bg-orange-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg">New Big Update</span>
@@ -117,19 +107,17 @@
                 </div>
             </div>
 
-            <!-- Bottom 4 Images -->
             <div class="w-full max-w-7xl mx-auto p-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 relative z-20 pb-10 float-up delay-2">
-                <img src="./images/1.png" alt="Img 1" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/1e293b/0ea5e9?text=1.png'">
-                <img src="./images/2.png" alt="Img 2" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/1e293b/0ea5e9?text=2.png'">
-                <img src="./images/3.png" alt="Img 3" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/1e293b/0ea5e9?text=3.png'">
-                <img src="./images/4.png" alt="Img 4" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x300/1e293b/0ea5e9?text=4.png'">
+                <img src="./images/1.png" alt="Img 1" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300">
+                <img src="./images/2.png" alt="Img 2" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300">
+                <img src="./images/3.png" alt="Img 3" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300">
+                <img src="./images/4.png" alt="Img 4" class="w-full h-auto rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-slate-700 hover:scale-105 transition duration-300">
             </div>
         </div>
 
-        <!-- 2. Teacher Dashboard (Compact Leaderboard Layout) -->
+        <!-- 2. Teacher Dashboard -->
         <div id="page-teacher-dashboard" class="page w-full max-w-[98%] mx-auto pt-6 px-2 pb-12" style="display: none;">
             
-            <!-- Header Row -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4 mb-4">
                 <div class="flex items-center gap-4">
                     <img src="./images/Hana Logo.jpg" alt="HANA" class="h-10 border rounded px-1" onerror="this.src='https://placehold.co/100x40?text=HANA'">
@@ -139,7 +127,6 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-6">
-                    <!-- Toggle Switch -->
                     <label class="flex items-center cursor-pointer group">
                         <div class="relative">
                             <input type="checkbox" id="toggle-system" class="sr-only">
@@ -155,20 +142,31 @@
                 </div>
             </div>
 
-            <!-- Top Row: Compact Leaderboard & Controls -->
+            <!-- Dashboard Stats Row -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
                 
-                <!-- Leaderboard (Takes up 3/4 space, Compact Design) -->
-                <div class="lg:col-span-3 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-md p-3 text-white flex flex-col justify-center">
-                    <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-1">
+                <!-- Leaderboard (Smaller) -->
+                <div class="lg:col-span-1 bg-slate-900 rounded-xl shadow-md p-4 text-white flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
                         <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-400"></i> Top 5 Leaderboard</h3>
                     </div>
-                    <div class="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide" id="leaderboard-list">
+                    <div class="flex flex-col gap-2 overflow-y-auto max-h-[150px] pr-2 scrollbar-hide" id="leaderboard-list">
                         <div class="text-center opacity-50 w-full py-1 text-xs">รอผลคะแนน...</div>
                     </div>
                 </div>
 
-                <!-- Controls (Takes up 1/4 space) -->
+                <!-- Needs Improvement (Fail List) -->
+                <div class="lg:col-span-2 bg-red-900/90 rounded-xl shadow-md p-4 text-white flex flex-col justify-start">
+                    <div class="flex items-center justify-between mb-3 border-b border-red-700 pb-2">
+                        <h3 class="text-sm font-bold flex items-center gap-2 text-red-100"><i class="fa-solid fa-triangle-exclamation text-red-400"></i> พนักงานที่คะแนนยังไม่ผ่าน (< 80%)</h3>
+                        <span class="text-xs font-bold bg-red-800 px-2 py-1 rounded-full"><span id="fail-count">0</span> คน</span>
+                    </div>
+                    <div class="overflow-y-auto max-h-[150px] pr-2 text-sm" id="fail-list">
+                        <div class="text-center opacity-50 w-full py-1 text-xs">ไม่มีผู้สอบตก</div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
                 <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-center gap-3">
                     <div class="flex justify-between items-center">
                         <label class="flex items-center gap-2 cursor-pointer group">
@@ -181,9 +179,10 @@
                         </label>
                     </div>
                     <div class="h-px w-full bg-slate-100"></div>
-                    <div class="flex gap-2">
-                        <button id="btn-dl-excel" class="flex-1 bg-emerald-500 text-white py-1.5 rounded-lg hover:bg-emerald-600 transition font-bold text-xs shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
-                        <button id="btn-clear-db" class="flex-1 bg-red-50 text-red-600 py-1.5 rounded-lg hover:bg-red-100 transition font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> ล้างข้อมูล</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-dl-excel" class="bg-emerald-500 text-white py-2 rounded-lg hover:bg-emerald-600 transition font-bold text-[10px] shadow-sm"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <button id="btn-clear-db" class="bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 transition font-bold text-[10px]"><i class="fa-solid fa-trash"></i> ล้างข้อมูล</button>
+                        <button id="btn-send-training" class="col-span-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-bold text-[10px] shadow-sm"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> ส่งผลสอบเข้า Training Record</button>
                     </div>
                 </div>
             </div>
@@ -191,19 +190,15 @@
             <!-- Full Width Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-[60vh] min-h-[450px]">
                 <div class="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
-                    <span class="font-bold text-slate-600">ตารางคะแนนรวม <span class="font-normal text-slate-400 ml-2">(คลิกที่เลขข้อบนหัวตารางเพื่อดูรายละเอียดคำถาม)</span></span>
-                    <span class="text-slate-400"><i class="fa-solid fa-bolt text-yellow-400"></i> Auto-update Realtime</span>
+                    <span class="font-bold text-slate-600">ตารางคะแนนรวม <span class="font-normal text-slate-400 ml-2">(คลิกที่เลขข้อเพื่อดูรายละเอียดคำถาม)</span></span>
+                    <span class="text-slate-400"><i class="fa-solid fa-bolt text-yellow-400"></i> Auto-update</span>
                 </div>
                 <div class="flex-1 overflow-auto relative">
                     <table class="w-full text-left border-collapse min-w-[2200px]"> 
                         <thead class="bg-white text-xs uppercase text-slate-500 shadow-sm sticky top-0 z-40">
-                            <tr id="grid-header-row">
-                                <!-- Headers injected by JS -->
-                            </tr>
+                            <tr id="grid-header-row"></tr>
                         </thead>
-                        <tbody id="grid-body" class="text-sm divide-y divide-slate-100">
-                            <!-- Data injected by JS -->
-                        </tbody>
+                        <tbody id="grid-body" class="text-sm divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -211,7 +206,6 @@
         
         <!-- 3. Question Detail Page -->
         <div id="page-question-detail" class="page w-full max-w-7xl mx-auto pt-6 px-4 pb-12" style="display: none;">
-            <!-- Content as before -->
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="lg:w-2/3 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
                     <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
@@ -263,30 +257,30 @@
             </div>
         </div>
 
-        <!-- 4. Student Login (Cyberpunk Theme) -->
-        <div id="page-student-login" class="page w-full min-h-screen cyberpunk-bg flex items-center justify-center p-4" style="display: none;">
-            <div class="glass-panel p-8 rounded-2xl shadow-2xl max-w-md w-full">
+        <!-- 4. Student Login (Light Theme) -->
+        <div id="page-student-login" class="page w-full min-h-screen bg-slate-50 flex items-center justify-center p-4" style="display: none;">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
                 <div class="text-center mb-8">
-                    <div class="w-20 h-20 bg-cyan-900/40 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-400 text-3xl border border-cyan-500/30 shadow-[0_0_15px_rgba(0,240,255,0.3)]"><i class="fa-solid fa-user-astronaut"></i></div>
-                    <h2 class="text-2xl font-black text-white tracking-wider">เข้าห้องสอบ</h2>
-                    <p class="text-cyan-500 text-sm mt-1">กรุณากรอกรหัสประจำตัวพนักงาน (EN)</p>
+                    <div class="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4 text-sky-600 text-3xl"><i class="fa-solid fa-user-graduate"></i></div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-wider">เข้าห้องสอบ</h2>
+                    <p class="text-slate-500 text-sm mt-1">กรุณากรอกรหัสประจำตัวพนักงาน (EN)</p>
                 </div>
                 <div class="space-y-5">
-                    <input type="text" id="student-id" class="w-full px-4 py-4 bg-slate-900/80 border-2 border-slate-700 rounded-xl focus:ring-4 focus:ring-cyan-900/50 focus:border-cyan-400 outline-none text-center text-xl font-bold tracking-widest transition uppercase text-cyan-300 shadow-inner placeholder-slate-600" placeholder="EN CODE">
+                    <input type="text" id="student-id" class="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-sky-100 focus:border-sky-500 outline-none text-center text-xl font-bold tracking-widest transition uppercase text-slate-800" placeholder="EN CODE">
                     
-                    <div id="student-preview" class="hidden bg-cyan-950/50 p-4 rounded-xl text-center border border-cyan-800">
-                        <p class="font-bold text-cyan-300 text-lg" id="preview-name"></p>
-                        <p class="text-sm text-slate-400" id="preview-dept"></p>
+                    <div id="student-preview" class="hidden bg-sky-50 p-4 rounded-xl text-center border border-sky-100">
+                        <p class="font-bold text-sky-800 text-lg" id="preview-name"></p>
+                        <p class="text-sm text-slate-500" id="preview-dept"></p>
                     </div>
                     
-                    <button id="btn-student-login" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-4 rounded-xl font-bold text-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] hover:scale-[1.02] transition border border-cyan-400/50">เริ่มทำข้อสอบ <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    <button id="btn-student-login" class="w-full bg-sky-600 text-white px-4 py-4 rounded-xl font-bold text-lg hover:bg-sky-700 hover:scale-[1.02] transition shadow-md">เริ่มทำข้อสอบ <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     
-                    <button onclick="location.reload()" class="w-full text-slate-400 hover:text-white transition mt-2 text-sm">ย้อนกลับ</button>
+                    <button onclick="location.reload()" class="w-full text-slate-400 hover:text-slate-600 transition mt-2 text-sm font-medium">ย้อนกลับหน้าแรก</button>
                 </div>
             </div>
         </div>
 
-        <!-- 5. Student Exam (Light Theme for readability) -->
+        <!-- 5. Student Exam -->
         <div id="page-student-exam" class="page m-auto bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden mt-4 flex-col h-[85vh] border border-slate-200" style="display: none;">
             <div class="bg-white p-5 border-b border-slate-100 flex justify-between items-center shadow-sm z-10">
                 <div class="flex items-center gap-3">
@@ -338,14 +332,14 @@
             </div>
         </div>
 
-        <!-- 7. Teacher Login (Cyberpunk Theme) -->
-        <div id="page-teacher-login" class="page w-full min-h-screen cyberpunk-bg flex items-center justify-center p-4" style="display: none;">
-            <div class="glass-panel p-8 rounded-2xl shadow-2xl max-w-md w-full">
-                <h2 class="text-2xl font-black text-center text-white mb-6 tracking-wider">สำหรับผู้คุมสอบ</h2>
+        <!-- 7. Teacher Login (Light Theme) -->
+        <div id="page-teacher-login" class="page w-full min-h-screen bg-slate-50 flex items-center justify-center p-4" style="display: none;">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200">
+                <h2 class="text-2xl font-black text-center text-slate-800 mb-6 tracking-wider">สำหรับผู้คุมสอบ</h2>
                 <div class="space-y-4">
-                    <input type="password" id="teacher-room-code" class="w-full px-4 py-4 bg-slate-900/80 border-2 border-slate-700 rounded-xl focus:ring-4 focus:ring-cyan-900/50 focus:border-cyan-400 outline-none text-center tracking-[0.5em] font-bold text-cyan-300 shadow-inner placeholder-slate-600" placeholder="PIN CODE">
-                    <button id="btn-teacher-login" class="w-full bg-cyan-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-cyan-500 transition shadow-[0_0_15px_rgba(0,240,255,0.3)]">เข้าสู่ระบบ Dashboard</button>
-                    <button onclick="location.reload()" class="w-full text-center text-slate-400 hover:text-white transition mt-2 text-sm font-medium">ย้อนกลับ</button>
+                    <input type="password" id="teacher-room-code" class="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-sky-100 focus:border-sky-500 outline-none text-center tracking-[0.5em] font-bold text-slate-800 placeholder-slate-400" placeholder="PIN CODE">
+                    <button id="btn-teacher-login" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-sky-700 transition shadow-md">เข้าสู่ระบบ Dashboard</button>
+                    <button onclick="location.reload()" class="w-full text-center text-slate-400 hover:text-slate-600 transition mt-2 text-sm font-medium">ย้อนกลับหน้าแรก</button>
                 </div>
             </div>
         </div>
@@ -382,13 +376,13 @@
             projectId: "rba-online-6342e",
             storageBucket: "rba-online-6342e.firebasestorage.app",
             messagingSenderId: "50383344070",
-            appId: "1:50383344070:web:5003afe4c5530fc1d5a2c7",
-            measurementId: "G-G75D8551FP"
+            appId: "1:50383344070:web:5003afe4c5530fc1d5a2c7"
         };
-        // =========================================================
 
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
-        const TEACHER_CODE = "056894"; // รหัสผ่านใหม่
+        const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/"; // ⚠️ เป้าหมายการส่งข้อมูล
+        const TEACHER_CODE = "056894";
+        const PASS_SCORE = 80;
         let sysIsOpen = false;
         
         const MASTER_QUESTIONS = [
@@ -444,7 +438,7 @@
                 db = initializeFirestore(app, { experimentalForceLongPolling: true });
                 auth = getAuth(app);
                 configRef = doc(db, 'bec_config_v13', 'main'); 
-                studentsRef = collection(db, 'bec_students_v13');
+                studentsRef = collection(db, 'bec_students_v13'); // ใช้ Database เดิมเพื่อเก็บคะแนนใหม่
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
@@ -494,29 +488,23 @@
 
             onSnapshot(configRef, (snap) => {
                 const isOpen = snap.exists() ? snap.data().isOpen : false;
-                sysIsOpen = isOpen;
-                sysCheckbox.checked = isOpen;
+                sysIsOpen = isOpen; sysCheckbox.checked = isOpen;
                 if(isOpen) {
                     toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
                     toggleDot.classList.add('translate-x-6');
-                    txtStatus.textContent = 'เปิดรับคำตอบแล้ว';
-                    txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
+                    txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
                 } else {
                     toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
                     toggleDot.classList.remove('translate-x-6');
-                    txtStatus.textContent = 'ปิดรับคำตอบ';
-                    txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+                    txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
                 }
             });
 
-            sysCheckbox.addEventListener('change', async (e) => {
-                e.preventDefault();
-                await setDoc(configRef, { isOpen: sysCheckbox.checked });
-            });
+            sysCheckbox.addEventListener('change', async (e) => { e.preventDefault(); await setDoc(configRef, { isOpen: sysCheckbox.checked }); });
 
             onSnapshot(query(studentsRef), (snap) => {
                 allResults = []; snap.forEach(d => allResults.push(d.data()));
-                renderGrid(); updateLeaderboard();
+                renderGrid(); updateLeaderboardAndFailList();
                 if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
             });
             document.getElementById('toggle-answers').onchange = () => renderGrid();
@@ -535,9 +523,19 @@
                 
                 tr.innerHTML += `<td class="p-3 text-center text-slate-400 text-xs sticky-col-1 group-hover:bg-slate-50">${i+1}</td>`;
                 tr.innerHTML += `<td class="p-3 text-center font-mono font-bold text-slate-700 text-sm sticky-col-2 group-hover:bg-slate-50">${s.studentId}</td>`;
-                tr.innerHTML += `<td class="p-3 whitespace-nowrap sticky-col-3 group-hover:bg-slate-50"><div class="font-bold text-slate-800 text-sm">${showNames ? s.name : '***'}</div><div class="text-xs text-slate-400">${s.dept}</div></td>`;
+                
+                // Show if they have a firstScore (meaning they retook the exam)
+                let nameHTML = `<div class="font-bold text-slate-800 text-sm">${showNames ? s.name : '***'}</div><div class="text-xs text-slate-400">${s.dept}</div>`;
+                if(s.firstScore !== undefined && s.firstScore !== s.score) {
+                    nameHTML += `<div class="text-[10px] text-orange-500 mt-0.5">เคยสอบได้: ${s.firstScore.toFixed(0)}%</div>`;
+                }
+                tr.innerHTML += `<td class="p-3 whitespace-nowrap sticky-col-3 group-hover:bg-slate-50">${nameHTML}</td>`;
+                
                 tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-sky-200 bg-sky-50 text-sky-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
-                tr.innerHTML += `<td class="p-3 text-center font-black text-cyan-600 text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
+                
+                // Color code score
+                let scoreColor = s.score >= PASS_SCORE ? 'text-emerald-600' : 'text-red-600';
+                tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
                 
                 if(s.answers) {
                     s.answers.forEach((ansIdx, idx) => {
@@ -550,8 +548,7 @@
                                 txt = isC ? "✓" : "✕"; 
                             } else cls += "bg-cyan-500 text-white"; 
                         } else {
-                            cls += "bg-slate-100 text-slate-300";
-                            txt = "•";
+                            cls += "bg-slate-100 text-slate-300"; txt = "•";
                         }
                         tr.innerHTML += `<td class="p-1 border-l border-slate-50"><div class="${cls}">${txt}</div></td>`;
                     });
@@ -560,22 +557,48 @@
             });
         }
 
-        function updateLeaderboard() {
-            const ranked = allResults.filter(s => s.status === 'submitted').sort((a,b) => b.score - a.score || a.timeTaken - b.timeTaken).slice(0, 5);
-            const div = document.getElementById('leaderboard-list'); div.innerHTML = '';
-            if(!ranked.length) { div.innerHTML = '<div class="text-center opacity-50 w-full py-1 text-xs">รอผลคะแนน...</div>'; return; }
-            ranked.forEach((s, i) => {
-                const colors = ["from-yellow-400 to-yellow-600", "from-slate-300 to-slate-400", "from-amber-600 to-amber-700", "from-slate-600 to-slate-700", "from-slate-600 to-slate-700"];
-                const icons = ["🥇", "🥈", "🥉", "4", "5"];
-                div.innerHTML += `
-                    <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 flex flex-col items-center min-w-[90px] flex-1">
-                        <div class="w-6 h-6 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center text-xs font-bold mb-1 shadow-lg">${icons[i]}</div>
-                        <div class="text-[10px] font-bold truncate w-full text-center text-slate-200">${s.name.split(' ')[0]}</div>
-                        <div class="text-base font-black text-cyan-400 mt-1">${s.score.toFixed(0)}%</div>
-                    </div>`;
-            });
+        function updateLeaderboardAndFailList() {
+            const submitted = allResults.filter(s => s.status === 'submitted');
+            
+            // Leaderboard (Top 5 Passers)
+            const ranked = [...submitted].sort((a,b) => b.score - a.score || a.timeTaken - b.timeTaken).slice(0, 5);
+            const lDiv = document.getElementById('leaderboard-list'); lDiv.innerHTML = '';
+            if(!ranked.length) { lDiv.innerHTML = '<div class="text-center opacity-50 w-full py-2 text-xs">ไม่มีข้อมูล</div>'; }
+            else {
+                ranked.forEach((s, i) => {
+                    const colors = ["from-yellow-400 to-yellow-600", "from-slate-300 to-slate-400", "from-amber-600 to-amber-700", "from-slate-600 to-slate-700", "from-slate-600 to-slate-700"];
+                    const icons = ["🥇", "🥈", "🥉", "4", "5"];
+                    lDiv.innerHTML += `
+                        <div class="flex items-center justify-between border-b border-slate-700 py-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center text-[10px] text-slate-900 font-bold">${icons[i]}</div>
+                                <span class="text-xs truncate max-w-[80px]">${s.name.split(' ')[0]}</span>
+                            </div>
+                            <span class="text-xs font-bold text-cyan-400">${s.score.toFixed(0)}%</span>
+                        </div>`;
+                });
+            }
+
+            // Fail List (< 80%)
+            const fails = [...submitted].filter(s => s.score < PASS_SCORE);
+            const fDiv = document.getElementById('fail-list'); fDiv.innerHTML = '';
+            document.getElementById('fail-count').innerText = fails.length;
+            if(!fails.length) { fDiv.innerHTML = '<div class="text-center opacity-50 w-full py-4 text-xs">ไม่มีผู้สอบตก</div>'; }
+            else {
+                fails.forEach(s => {
+                    fDiv.innerHTML += `
+                        <div class="flex items-center justify-between border-b border-red-800/50 py-1.5 px-2 hover:bg-red-800/30">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold">${s.studentId}</span>
+                                <span class="text-[10px] text-red-200">${s.name}</span>
+                            </div>
+                            <span class="text-sm font-bold text-white">${s.score.toFixed(0)}%</span>
+                        </div>`;
+                });
+            }
         }
 
+        // --- QUESTION DETAILS (Same as before) ---
         function openQuestionDetail(index) {
             currentDetailQuestionIndex = index; showDetailResults = false;
             show('page-question-detail'); renderQuestionDetail();
@@ -636,40 +659,100 @@
         document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
         document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < MASTER_QUESTIONS.length - 1) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
 
-        // --- STUDENT SYSTEM (With Robust Fetching) ---
+
+        // --- SEND TO TRAINING WEB API ---
+        document.getElementById('btn-send-training').onclick = async () => {
+            const submitted = allResults.filter(s => s.status === 'submitted');
+            if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
+
+            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?\n\n*หมายเหตุ: หากคุณทดสอบบนเครื่องส่วนตัว อาจมีการแจ้งเตือนความปลอดภัยเนื่องจากส่งข้อมูลข้ามโปรโตคอล (HTTPS -> HTTP)`)) return;
+
+            const btn = document.getElementById('btn-send-training');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังส่ง...';
+            btn.disabled = true;
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const s of submitted) {
+                // Prepare payload format for destination server
+                const payload = {
+                    employeeId: s.studentId,
+                    name: s.name,
+                    department: s.dept,
+                    courseName: "Basic Electronics",
+                    passScore: null,
+                    failScore: null
+                };
+
+                // Logic 80% criteria
+                if (s.firstScore !== undefined && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
+                    // สอบแก้ตัวผ่าน
+                    payload.passScore = s.score;
+                    payload.failScore = s.firstScore;
+                } else if (s.score >= PASS_SCORE) {
+                    // ผ่านตั้งแต่แรก
+                    payload.passScore = s.score;
+                } else {
+                    // ไม่ผ่าน
+                    payload.failScore = s.score;
+                }
+
+                try {
+                    const response = await fetch(TRAINING_WEB_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Need this because destination is likely not setting CORS headers
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    // Since it's no-cors, we can't read the exact response, assume success if fetch didn't throw
+                    successCount++;
+                } catch (error) {
+                    console.error("Failed to send:", s.studentId, error);
+                    failCount++;
+                }
+            }
+
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            
+            showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
+        };
+
+
+        // --- STUDENT SYSTEM ---
         async function fetchStudents() { 
             if(studentCache) return studentCache; 
             try {
-                // Ensure correct exact URL formatting
                 const res = await fetch(SHEET_URL, { cache: "no-store" }); 
                 if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
                 const csv = await res.text(); 
                 return new Promise((resolve, reject) => {
                     Papa.parse(csv, {
-                        header:true, 
-                        skipEmptyLines:true, 
+                        header:true, skipEmptyLines:true, 
                         complete: res => resolve(res.data),
                         error: err => reject(err)
                     });
                 });
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                throw error;
-            }
+            } catch (error) { throw error; }
         }
         
         document.getElementById('student-id').addEventListener('input', async (e) => { 
-            const id = e.target.value.trim().toUpperCase(); if(id.length < 3) return; 
+            const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
             try {
-                const list = await fetchStudents(); const s = list.find(x => x['รหัสประจำตัว'] == id); 
+                const list = await fetchStudents(); 
+                // ค้นหาโดยไม่สนใจเลข 0 ข้างหน้า
+                const s = list.find(x => String(x['รหัสประจำตัว']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
                 if(s) { 
                     const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
                     document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = s['แผนก']; 
                     document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
                 } else document.getElementById('student-preview').classList.add('hidden'); 
-            } catch(e) {
-                // Silent catch for live input typing so it doesn't spam alerts
-            }
+            } catch(e) {}
         });
 
         document.getElementById('btn-student-login').onclick = async () => {
@@ -679,47 +762,67 @@
 
             try {
                 if(!sysIsOpen) { showModal("ขณะนี้ระบบห้องสอบยังไม่เปิดให้บริการ\nโปรดรอประกาศจากผู้ควบคุม"); return; }
-                const id = document.getElementById('student-id').value.trim().toUpperCase();
-                if(!id) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
+                const rawId = document.getElementById('student-id').value.trim();
+                if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
 
                 let list;
-                try {
-                    list = await fetchStudents(); 
-                } catch(err) {
-                    showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้\n(โปรดตรวจสอบการแชร์ Google Sheet เป็น 'ทุกคนที่มีลิงก์' หรืออินเทอร์เน็ตของท่าน)");
-                    return;
-                }
+                try { list = await fetchStudents(); } 
+                catch(err) { showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); return; }
 
-                const s = list.find(x => x['รหัสประจำตัว'] == id); 
+                // ค้นหาแบบยืดหยุ่น (ตัดเลข 0 ข้างหน้าออกเทียบกัน)
+                const s = list.find(x => String(x['รหัสประจำตัว']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
                 if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ");
 
                 const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
-                currentStudent = { id: s['รหัสประจำตัว'], name: fullName, dept: s['แผนก'], startTime: Date.now() };
+                // เก็บ ID ให้ตรงกับฐานข้อมูลเป๊ะๆ
+                const exactId = String(s['รหัสประจำตัว']);
+                currentStudent = { id: exactId, name: fullName, dept: s['แผนก'], startTime: Date.now() };
+                
                 const existing = await getDoc(doc(studentsRef, currentStudent.id));
                 
+                let previousData = null;
+
                 if(existing.exists() && existing.data().status === 'submitted') {
-                    showModal("คุณทำแบบทดสอบไปแล้ว ระบบบันทึกคะแนนของคุณเรียบร้อยแล้ว"); return;
+                    const prevScore = existing.data().score;
+                    if(prevScore >= PASS_SCORE) {
+                        showModal(`คุณทำแบบทดสอบผ่านแล้วด้วยคะแนน ${prevScore.toFixed(0)}%\nไม่จำเป็นต้องสอบใหม่`); return;
+                    } else {
+                        // สอบไม่ผ่าน อนุญาตให้สอบใหม่ได้
+                        if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${prevScore.toFixed(0)}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) {
+                            return;
+                        }
+                        // เก็บข้อมูลเดิมไว้
+                        previousData = existing.data();
+                    }
                 }
                 
-                if(!existing.exists()) { 
-                    await setDoc(doc(studentsRef, currentStudent.id), { studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, status: 'online', score: null, answers: new Array(40).fill(null) }); 
-                    setupRandomQuestions(); 
-                } else { 
-                    setupRandomQuestions(); const saved = existing.data().answers; 
-                    studentQuestions.forEach(q => { if(saved[q.originalIndex] !== null) studentAnswersMap[q.originalIndex] = saved[q.originalIndex]; }); 
+                // ถ้ายอมสอบใหม่ หรือสอบครั้งแรก
+                let initData = { 
+                    studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
+                    status: 'online', score: null, answers: new Array(40).fill(null) 
+                };
+
+                // ถ้ามีประวัติคะแนนเดิม ให้เก็บ firstScore ไว้
+                if (previousData) {
+                    initData.firstScore = previousData.firstScore !== undefined ? previousData.firstScore : previousData.score;
                 }
-                document.getElementById('exam-student-name').innerText = currentStudent.name; document.getElementById('exam-student-dept').innerText = currentStudent.dept;
+
+                await setDoc(doc(studentsRef, currentStudent.id), initData); 
+                setupRandomQuestions(true); // บังคับสุ่มใหม่
+                
+                document.getElementById('exam-student-name').innerText = currentStudent.name; 
+                document.getElementById('exam-student-dept').innerText = currentStudent.dept;
                 renderQuestion(); show('page-student-exam');
             } catch(e) { console.error(e); } finally { btn.innerHTML = originalText; btn.disabled = false; }
         };
 
-        function setupRandomQuestions() {
+        function setupRandomQuestions(forceReshuffle = false) {
             let qs = MASTER_QUESTIONS.map((q, i) => ({ ...q, originalIndex: i }));
             const storageKey = `rba_order_${currentStudent.id}`; const orderKey = `rba_opts_order_${currentStudent.id}`;
-            const savedOrder = localStorage.getItem(storageKey); const savedOpts = localStorage.getItem(orderKey);
             
-            if(savedOrder && JSON.parse(savedOrder).length === 40) { 
-                studentQuestions = JSON.parse(savedOrder).map(i => qs[i]); studentOptionOrders = JSON.parse(savedOpts); 
+            if(!forceReshuffle && localStorage.getItem(storageKey)) { 
+                studentQuestions = JSON.parse(localStorage.getItem(storageKey)).map(i => qs[i]); 
+                studentOptionOrders = JSON.parse(localStorage.getItem(orderKey)); 
             } else { 
                 for (let i = 39; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [qs[i], qs[j]] = [qs[j], qs[i]]; } 
                 studentQuestions = qs; studentOptionOrders = {}; 
@@ -751,14 +854,21 @@
             const optsContainer = document.getElementById('options-container'); optsContainer.innerHTML = '';
             studentOptionOrders[q.originalIndex].forEach((origIdx, i) => { 
                 const isS = studentAnswersMap[q.originalIndex] === origIdx; 
-                optsContainer.innerHTML += `<div onclick="selectAnswer(${origIdx})" class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all group ${isS ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 hover:border-cyan-300 hover:bg-slate-50'}"><div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 ${isS ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-slate-300 bg-white group-hover:border-cyan-300'}">${isS ? '✓' : String.fromCharCode(65 + i)}</div><span class="text-lg font-medium ${isS ? 'text-cyan-800' : 'text-slate-700'}">${q.opts[origIdx]}</span></div>`; 
+                optsContainer.innerHTML += `<div onclick="selectAnswer(${origIdx})" class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all group ${isS ? 'border-sky-500 bg-sky-50 shadow-md' : 'border-slate-100 hover:border-sky-300 hover:bg-slate-50'}"><div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 ${isS ? 'bg-sky-500 border-sky-500 text-white' : 'border-slate-300 bg-white group-hover:border-sky-300'}">${isS ? '✓' : String.fromCharCode(65 + i)}</div><span class="text-lg font-medium ${isS ? 'text-sky-800' : 'text-slate-700'}">${q.opts[origIdx]}</span></div>`; 
             });
         }
 
         window.selectAnswer = async (val) => { 
             studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; renderQuestion(); 
             const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
-            await updateDoc(doc(studentsRef, currentStudent.id), { answers: masterArray }); 
+            
+            // Get current doc to preserve firstScore if it exists
+            const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
+            let payload = { answers: masterArray };
+            if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
+                payload.firstScore = docSnap.data().firstScore;
+            }
+            await updateDoc(doc(studentsRef, currentStudent.id), payload); 
         };
         
         document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
@@ -772,16 +882,28 @@
             const finalScore = (score / 40) * 100;
             const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; }
             
-            await updateDoc(doc(studentsRef, currentStudent.id), { answers: masterArray, score: finalScore, status: 'submitted', timeTaken: (Date.now() - currentStudent.startTime)/1000 });
+            const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
+            let payload = { answers: masterArray, score: finalScore, status: 'submitted', timeTaken: (Date.now() - currentStudent.startTime)/1000 };
+            if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
+                payload.firstScore = docSnap.data().firstScore;
+            } else {
+                payload.firstScore = finalScore; // เซฟคะแนนครั้งแรก
+            }
+
+            await updateDoc(doc(studentsRef, currentStudent.id), payload);
             
             document.getElementById('submit-score-percent').innerText = finalScore.toFixed(0);
             document.getElementById('submit-score-correct').innerText = score;
             
-            if(finalScore === 100) {
+            if(finalScore >= PASS_SCORE) {
                 document.getElementById('submit-emoji').innerText = "🏆";
-                document.getElementById('submit-title').innerText = "ยินดีด้วย! คุณทำคะแนนได้เต็ม 100%";
-                document.getElementById('submit-title').classList.add('text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-cyan-400', 'to-blue-600');
-                startCelebration();
+                document.getElementById('submit-title').innerText = "ยินดีด้วย! คุณสอบผ่าน";
+                document.getElementById('submit-title').className = "text-2xl font-black mb-6 text-emerald-600";
+                if(finalScore === 100) startCelebration();
+            } else {
+                document.getElementById('submit-emoji').innerText = "❌";
+                document.getElementById('submit-title').innerText = "เสียใจด้วย คุณสอบไม่ผ่าน";
+                document.getElementById('submit-title').className = "text-2xl font-black mb-6 text-red-600";
             }
             show('page-submitted');
         };
@@ -801,7 +923,7 @@
 
         document.getElementById('btn-dl-excel').onclick = () => {
             const data = allResults.map((s, i) => { 
-                const row = { "ลำดับ": i+1, "รหัส": s.studentId, "ชื่อ-สกุล": s.name, "แผนก": s.dept, "คะแนน(%)": s.score || 0 }; 
+                const row = { "ลำดับ": i+1, "รหัส": s.studentId, "ชื่อ-สกุล": s.name, "แผนก": s.dept, "คะแนนครั้งแรก(%)": s.firstScore||0, "คะแนนล่าสุด(%)": s.score || 0 }; 
                 if(s.answers) { s.answers.forEach((ans, idx) => { row[`ข้อ ${idx+1}`] = (ans === MASTER_QUESTIONS[idx].a) ? "ถูก" : (ans === null ? "ไม่ตอบ" : "ผิด"); }); }
                 return row; 
             });
