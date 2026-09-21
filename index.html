@@ -27,9 +27,10 @@
             text-shadow: 0 0 10px rgba(0,240,255,0.6);
         }
         .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
         /* ---------------------------------- */
 
@@ -98,13 +99,13 @@
             <!-- Hero Content -->
             <div class="flex-1 flex flex-col justify-center items-center text-center px-4 relative z-20">
                 <div class="float-up mb-4">
-                    <span class="bg-orange-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg">ระบบข้อสอบ online แบบ real time HANA Lamphun</span>
+                    <span class="bg-orange-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg">New Big Update</span>
                 </div>
                 <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-tight float-up delay-1">
                     Basic Electronics <br> <span class="neon-text">Exam System</span>
                 </h1>
                 <p class="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 float-up delay-1">
-                    ระบบทดสอบความรู้พื้นฐานทางด้านอิเล็กทรอนิกส์ สำหรับพนักงาน Hana Lamphun
+                    ระบบทดสอบความรู้พื้นฐานทางด้านอิเล็กทรอนิกส์ สำหรับพนักงาน กรุณาเตรียมรหัสประจำตัวให้พร้อมเพื่อเข้าสู่ระบบการทดสอบ
                 </p>
                 <div class="flex flex-col sm:flex-row gap-5 float-up delay-2">
                     <button id="btn-go-student" class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-10 py-4 rounded-full font-bold text-lg transition shadow-[0_0_15px_rgba(0,240,255,0.4)]">
@@ -125,7 +126,7 @@
             </div>
         </div>
 
-        <!-- 2. Teacher Dashboard (New Layout) -->
+        <!-- 2. Teacher Dashboard (Compact Leaderboard Layout) -->
         <div id="page-teacher-dashboard" class="page w-full max-w-[98%] mx-auto pt-6 px-2 pb-12" style="display: none;">
             
             <!-- Header Row -->
@@ -154,41 +155,41 @@
                 </div>
             </div>
 
-            <!-- Top Row: Leaderboard & Controls -->
+            <!-- Top Row: Compact Leaderboard & Controls -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
                 
-                <!-- Leaderboard (Takes up 3/4 space) -->
-                <div class="lg:col-span-3 bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-md p-5 text-white">
-                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
-                        <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-400"></i> Top 5 Leaderboard</h3>
+                <!-- Leaderboard (Takes up 3/4 space, Compact Design) -->
+                <div class="lg:col-span-3 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-md p-3 text-white flex flex-col justify-center">
+                    <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-1">
+                        <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-400"></i> Top 5 Leaderboard</h3>
                     </div>
-                    <div class="flex flex-nowrap gap-3 overflow-x-auto pb-2 scrollbar-hide" id="leaderboard-list">
-                        <div class="text-center opacity-50 w-full py-2 text-sm">รอผลคะแนน...</div>
+                    <div class="flex flex-nowrap gap-2 overflow-x-auto scrollbar-hide" id="leaderboard-list">
+                        <div class="text-center opacity-50 w-full py-1 text-xs">รอผลคะแนน...</div>
                     </div>
                 </div>
 
                 <!-- Controls (Takes up 1/4 space) -->
-                <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-center gap-4">
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-center gap-3">
                     <div class="flex justify-between items-center">
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" id="toggle-names" class="w-5 h-5 accent-sky-600" checked>
-                            <span class="text-slate-700 font-bold text-sm">แสดงชื่อ</span>
+                            <input type="checkbox" id="toggle-names" class="w-4 h-4 accent-sky-600" checked>
+                            <span class="text-slate-700 font-bold text-xs">แสดงชื่อ</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" id="toggle-answers" class="w-5 h-5 accent-green-500">
-                            <span class="text-slate-700 font-bold text-sm">เฉลย (ถูก/ผิด)</span>
+                            <input type="checkbox" id="toggle-answers" class="w-4 h-4 accent-green-500">
+                            <span class="text-slate-700 font-bold text-xs">เฉลย (ถูก/ผิด)</span>
                         </label>
                     </div>
                     <div class="h-px w-full bg-slate-100"></div>
                     <div class="flex gap-2">
-                        <button id="btn-dl-excel" class="flex-1 bg-emerald-500 text-white py-2 rounded-xl hover:bg-emerald-600 transition font-bold text-xs shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
-                        <button id="btn-clear-db" class="flex-1 bg-red-50 text-red-600 py-2 rounded-xl hover:bg-red-100 transition font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> ล้างข้อมูล</button>
+                        <button id="btn-dl-excel" class="flex-1 bg-emerald-500 text-white py-1.5 rounded-lg hover:bg-emerald-600 transition font-bold text-xs shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i> Excel</button>
+                        <button id="btn-clear-db" class="flex-1 bg-red-50 text-red-600 py-1.5 rounded-lg hover:bg-red-100 transition font-bold text-xs"><i class="fa-solid fa-trash mr-1"></i> ล้างข้อมูล</button>
                     </div>
                 </div>
             </div>
 
             <!-- Full Width Table -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-[60vh] min-h-[500px]">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-[60vh] min-h-[450px]">
                 <div class="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
                     <span class="font-bold text-slate-600">ตารางคะแนนรวม <span class="font-normal text-slate-400 ml-2">(คลิกที่เลขข้อบนหัวตารางเพื่อดูรายละเอียดคำถาม)</span></span>
                     <span class="text-slate-400"><i class="fa-solid fa-bolt text-yellow-400"></i> Auto-update Realtime</span>
@@ -210,6 +211,7 @@
         
         <!-- 3. Question Detail Page -->
         <div id="page-question-detail" class="page w-full max-w-7xl mx-auto pt-6 px-4 pb-12" style="display: none;">
+            <!-- Content as before -->
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="lg:w-2/3 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
                     <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
@@ -261,26 +263,31 @@
             </div>
         </div>
 
-        <!-- 4. Student Login -->
-        <div id="page-student-login" class="page m-auto bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-100">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-600 text-3xl"><i class="fa-solid fa-user-astronaut"></i></div>
-                <h2 class="text-2xl font-black text-slate-800">เข้าห้องสอบ</h2>
-                <p class="text-slate-500 text-sm">กรุณากรอกรหัสประจำตัวพนักงาน (EN)</p>
-            </div>
-            <div class="space-y-5">
-                <input type="text" id="student-id" class="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-cyan-100 focus:border-cyan-500 outline-none text-center text-xl font-bold tracking-widest transition uppercase" placeholder="EN CODE">
-                <div id="student-preview" class="hidden bg-cyan-50 p-4 rounded-xl text-center border border-cyan-100">
-                    <p class="font-bold text-cyan-800 text-lg" id="preview-name"></p>
-                    <p class="text-sm text-cyan-600" id="preview-dept"></p>
+        <!-- 4. Student Login (Cyberpunk Theme) -->
+        <div id="page-student-login" class="page w-full min-h-screen cyberpunk-bg flex items-center justify-center p-4" style="display: none;">
+            <div class="glass-panel p-8 rounded-2xl shadow-2xl max-w-md w-full">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-cyan-900/40 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-400 text-3xl border border-cyan-500/30 shadow-[0_0_15px_rgba(0,240,255,0.3)]"><i class="fa-solid fa-user-astronaut"></i></div>
+                    <h2 class="text-2xl font-black text-white tracking-wider">เข้าห้องสอบ</h2>
+                    <p class="text-cyan-500 text-sm mt-1">กรุณากรอกรหัสประจำตัวพนักงาน (EN)</p>
                 </div>
-                <button id="btn-student-login" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:scale-[1.02] transition">เริ่มทำข้อสอบ <i class="fa-solid fa-arrow-right ml-2"></i></button>
-                <button onclick="location.reload()" class="w-full text-slate-400 text-sm hover:text-slate-600 mt-2">ย้อนกลับ</button>
+                <div class="space-y-5">
+                    <input type="text" id="student-id" class="w-full px-4 py-4 bg-slate-900/80 border-2 border-slate-700 rounded-xl focus:ring-4 focus:ring-cyan-900/50 focus:border-cyan-400 outline-none text-center text-xl font-bold tracking-widest transition uppercase text-cyan-300 shadow-inner placeholder-slate-600" placeholder="EN CODE">
+                    
+                    <div id="student-preview" class="hidden bg-cyan-950/50 p-4 rounded-xl text-center border border-cyan-800">
+                        <p class="font-bold text-cyan-300 text-lg" id="preview-name"></p>
+                        <p class="text-sm text-slate-400" id="preview-dept"></p>
+                    </div>
+                    
+                    <button id="btn-student-login" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-4 rounded-xl font-bold text-lg hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] hover:scale-[1.02] transition border border-cyan-400/50">เริ่มทำข้อสอบ <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    
+                    <button onclick="location.reload()" class="w-full text-slate-400 hover:text-white transition mt-2 text-sm">ย้อนกลับ</button>
+                </div>
             </div>
         </div>
 
-        <!-- 5. Student Exam -->
-        <div id="page-student-exam" class="page m-auto bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden mt-4 flex-col h-[85vh] border border-slate-200">
+        <!-- 5. Student Exam (Light Theme for readability) -->
+        <div id="page-student-exam" class="page m-auto bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden mt-4 flex-col h-[85vh] border border-slate-200" style="display: none;">
             <div class="bg-white p-5 border-b border-slate-100 flex justify-between items-center shadow-sm z-10">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold"><i class="fa-solid fa-user"></i></div>
@@ -310,7 +317,7 @@
         </div>
 
         <!-- 6. Submitted -->
-        <div id="page-submitted" class="page m-auto bg-white p-10 rounded-3xl shadow-2xl text-center max-w-lg mt-10 border border-slate-100 relative overflow-hidden">
+        <div id="page-submitted" class="page m-auto bg-white p-10 rounded-3xl shadow-2xl text-center max-w-lg mt-10 border border-slate-100 relative overflow-hidden" style="display: none;">
             <div id="confetti-container" class="absolute inset-0 pointer-events-none z-50"></div>
             <div class="relative z-10">
                 <div id="submit-emoji" class="mb-4 text-7xl animate-bounce">🎉</div>
@@ -331,13 +338,15 @@
             </div>
         </div>
 
-        <!-- 7. Teacher Login -->
-        <div id="page-teacher-login" class="page bg-white p-8 rounded-2xl shadow-2xl max-w-md mx-auto mt-10 border border-slate-100">
-            <h2 class="text-2xl font-black text-center text-slate-800 mb-6">สำหรับผู้คุมสอบ</h2>
-            <div class="space-y-4">
-                <input type="password" id="teacher-room-code" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-slate-100 focus:border-slate-800 outline-none text-center tracking-[0.5em] font-bold" placeholder="PIN CODE">
-                <button id="btn-teacher-login" class="w-full bg-slate-800 text-white px-4 py-3 rounded-xl font-bold hover:bg-slate-900 transition shadow-md">เข้าสู่ระบบ Dashboard</button>
-                <button onclick="location.reload()" class="w-full text-center text-slate-400 hover:text-slate-600 transition mt-2 text-sm font-medium">ย้อนกลับ</button>
+        <!-- 7. Teacher Login (Cyberpunk Theme) -->
+        <div id="page-teacher-login" class="page w-full min-h-screen cyberpunk-bg flex items-center justify-center p-4" style="display: none;">
+            <div class="glass-panel p-8 rounded-2xl shadow-2xl max-w-md w-full">
+                <h2 class="text-2xl font-black text-center text-white mb-6 tracking-wider">สำหรับผู้คุมสอบ</h2>
+                <div class="space-y-4">
+                    <input type="password" id="teacher-room-code" class="w-full px-4 py-4 bg-slate-900/80 border-2 border-slate-700 rounded-xl focus:ring-4 focus:ring-cyan-900/50 focus:border-cyan-400 outline-none text-center tracking-[0.5em] font-bold text-cyan-300 shadow-inner placeholder-slate-600" placeholder="PIN CODE">
+                    <button id="btn-teacher-login" class="w-full bg-cyan-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-cyan-500 transition shadow-[0_0_15px_rgba(0,240,255,0.3)]">เข้าสู่ระบบ Dashboard</button>
+                    <button onclick="location.reload()" class="w-full text-center text-slate-400 hover:text-white transition mt-2 text-sm font-medium">ย้อนกลับ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -378,8 +387,8 @@
         };
         // =========================================================
 
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1BxfK2ME43OzYFI5KTFZigGsNDAyn7aOgUtIfpR2k2R8/export?format=csv&gid=0";
-        const TEACHER_CODE = "056894"; // รหัสผ่านใหม่ตามที่ระบุ
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
+        const TEACHER_CODE = "056894"; // รหัสผ่านใหม่
         let sysIsOpen = false;
         
         const MASTER_QUESTIONS = [
@@ -470,7 +479,6 @@
 
         // --- TEACHER SYSTEM ---
         function initTeacherDashboard() {
-            // สร้าง Header ตาราง โดยเพิ่มคอลัมน์ EN
             const thead = document.getElementById('grid-header-row');
             thead.innerHTML = `<th class="p-3 border-b text-center sticky-col-1">#</th><th class="p-3 border-b text-center sticky-col-2 w-24">EN</th><th class="p-3 border-b min-w-[200px] sticky-col-3">ชื่อ-สกุล</th><th class="p-3 border-b text-center w-20">สถานะ</th><th class="p-3 border-b text-center w-16 font-black text-cyan-600">%</th>`;
             MASTER_QUESTIONS.forEach((_, i) => {
@@ -479,7 +487,6 @@
                 th.innerText = i + 1; th.onclick = () => openQuestionDetail(i); thead.appendChild(th);
             });
 
-            // Toggle Switch Logic
             const toggleBg = document.getElementById('toggle-bg');
             const toggleDot = document.getElementById('toggle-dot');
             const txtStatus = document.getElementById('txt-system-status');
@@ -507,7 +514,6 @@
                 await setDoc(configRef, { isOpen: sysCheckbox.checked });
             });
 
-            // Student Data Listener
             onSnapshot(query(studentsRef), (snap) => {
                 allResults = []; snap.forEach(d => allResults.push(d.data()));
                 renderGrid(); updateLeaderboard();
@@ -527,14 +533,12 @@
             allResults.forEach((s, i) => {
                 const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition";
                 
-                // Add Columns: #, EN, Name, Status, Score
                 tr.innerHTML += `<td class="p-3 text-center text-slate-400 text-xs sticky-col-1 group-hover:bg-slate-50">${i+1}</td>`;
                 tr.innerHTML += `<td class="p-3 text-center font-mono font-bold text-slate-700 text-sm sticky-col-2 group-hover:bg-slate-50">${s.studentId}</td>`;
                 tr.innerHTML += `<td class="p-3 whitespace-nowrap sticky-col-3 group-hover:bg-slate-50"><div class="font-bold text-slate-800 text-sm">${showNames ? s.name : '***'}</div><div class="text-xs text-slate-400">${s.dept}</div></td>`;
                 tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-sky-200 bg-sky-50 text-sky-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
                 tr.innerHTML += `<td class="p-3 text-center font-black text-cyan-600 text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
                 
-                // Answers
                 if(s.answers) {
                     s.answers.forEach((ansIdx, idx) => {
                         let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold ";
@@ -559,15 +563,15 @@
         function updateLeaderboard() {
             const ranked = allResults.filter(s => s.status === 'submitted').sort((a,b) => b.score - a.score || a.timeTaken - b.timeTaken).slice(0, 5);
             const div = document.getElementById('leaderboard-list'); div.innerHTML = '';
-            if(!ranked.length) { div.innerHTML = '<div class="text-center opacity-50 w-full py-2 text-sm">ยังไม่มีข้อมูล</div>'; return; }
+            if(!ranked.length) { div.innerHTML = '<div class="text-center opacity-50 w-full py-1 text-xs">รอผลคะแนน...</div>'; return; }
             ranked.forEach((s, i) => {
                 const colors = ["from-yellow-400 to-yellow-600", "from-slate-300 to-slate-400", "from-amber-600 to-amber-700", "from-slate-600 to-slate-700", "from-slate-600 to-slate-700"];
                 const icons = ["🥇", "🥈", "🥉", "4", "5"];
                 div.innerHTML += `
-                    <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700 flex flex-col items-center min-w-[120px] flex-1">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center text-sm font-bold mb-2 shadow-lg">${icons[i]}</div>
-                        <div class="text-xs font-bold truncate w-full text-center text-slate-200">${s.name.split(' ')[0]}</div>
-                        <div class="text-lg font-black text-cyan-400 mt-1">${s.score.toFixed(0)}%</div>
+                    <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 flex flex-col items-center min-w-[90px] flex-1">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center text-xs font-bold mb-1 shadow-lg">${icons[i]}</div>
+                        <div class="text-[10px] font-bold truncate w-full text-center text-slate-200">${s.name.split(' ')[0]}</div>
+                        <div class="text-base font-black text-cyan-400 mt-1">${s.score.toFixed(0)}%</div>
                     </div>`;
             });
         }
@@ -632,21 +636,40 @@
         document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
         document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < MASTER_QUESTIONS.length - 1) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
 
-        // --- STUDENT SYSTEM ---
+        // --- STUDENT SYSTEM (With Robust Fetching) ---
         async function fetchStudents() { 
             if(studentCache) return studentCache; 
-            const res = await fetch(SHEET_URL); const csv = await res.text(); 
-            return new Promise(r => Papa.parse(csv, {header:true, skipEmptyLines:true, complete: res=>r(res.data)})); 
+            try {
+                // Ensure correct exact URL formatting
+                const res = await fetch(SHEET_URL, { cache: "no-store" }); 
+                if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
+                const csv = await res.text(); 
+                return new Promise((resolve, reject) => {
+                    Papa.parse(csv, {
+                        header:true, 
+                        skipEmptyLines:true, 
+                        complete: res => resolve(res.data),
+                        error: err => reject(err)
+                    });
+                });
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                throw error;
+            }
         }
         
         document.getElementById('student-id').addEventListener('input', async (e) => { 
             const id = e.target.value.trim().toUpperCase(); if(id.length < 3) return; 
-            const list = await fetchStudents(); const s = list.find(x => x['รหัสประจำตัว'] == id); 
-            if(s) { 
-                const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
-                document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = s['แผนก']; 
-                document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
-            } else document.getElementById('student-preview').classList.add('hidden'); 
+            try {
+                const list = await fetchStudents(); const s = list.find(x => x['รหัสประจำตัว'] == id); 
+                if(s) { 
+                    const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
+                    document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = s['แผนก']; 
+                    document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
+                } else document.getElementById('student-preview').classList.add('hidden'); 
+            } catch(e) {
+                // Silent catch for live input typing so it doesn't spam alerts
+            }
         });
 
         document.getElementById('btn-student-login').onclick = async () => {
@@ -657,9 +680,17 @@
             try {
                 if(!sysIsOpen) { showModal("ขณะนี้ระบบห้องสอบยังไม่เปิดให้บริการ\nโปรดรอประกาศจากผู้ควบคุม"); return; }
                 const id = document.getElementById('student-id').value.trim().toUpperCase();
-                if(!id) return showModal("กรุณากรอกรหัสประจำตัว (EN)");
+                if(!id) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
 
-                const list = await fetchStudents(); const s = list.find(x => x['รหัสประจำตัว'] == id); 
+                let list;
+                try {
+                    list = await fetchStudents(); 
+                } catch(err) {
+                    showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้\n(โปรดตรวจสอบการแชร์ Google Sheet เป็น 'ทุกคนที่มีลิงก์' หรืออินเทอร์เน็ตของท่าน)");
+                    return;
+                }
+
+                const s = list.find(x => x['รหัสประจำตัว'] == id); 
                 if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ");
 
                 const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
