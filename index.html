@@ -366,9 +366,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // =========================================================
-        // ⚠️ โค้ด Firebase ของโปรเจกต์เดิม (ใช้เก็บข้อมูล Real-time)
-        // =========================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCr08U5KYGvxXu-DZ5qZOyVnU_1MJ-oY50", 
             authDomain: "rba-online-6342e.firebaseapp.com",
@@ -438,7 +435,7 @@
                 db = initializeFirestore(app, { experimentalForceLongPolling: true });
                 auth = getAuth(app);
                 configRef = doc(db, 'bec_config_v13', 'main'); 
-                studentsRef = collection(db, 'bec_students_v13');
+                studentsRef = collection(db, 'bec_students_v13'); 
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
@@ -535,21 +532,23 @@
                 let scoreColor = s.score >= PASS_SCORE ? 'text-emerald-600' : 'text-red-600';
                 tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
                 
-                if(s.answers) {
-                    s.answers.forEach((ansIdx, idx) => {
-                        let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold ";
-                        let txt = (ansIdx === null) ? "" : "";
-                        if (ansIdx !== null) { 
-                            if(showAnswers) { 
-                                const isC = (ansIdx === MASTER_QUESTIONS[idx].a); 
-                                cls += isC ? "bg-emerald-500 text-white" : "bg-red-500 text-white"; 
-                                txt = isC ? "✓" : "✕"; 
-                            } else cls += "bg-cyan-500 text-white"; 
+                for (let idx = 0; idx < MASTER_QUESTIONS.length; idx++) {
+                    const ansIdx = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
+                    let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold ";
+                    let txt = "";
+                    if (ansIdx !== null && ansIdx !== undefined) { 
+                        if(showAnswers) { 
+                            const isC = (ansIdx === MASTER_QUESTIONS[idx].a); 
+                            cls += isC ? "bg-emerald-500 text-white shadow-sm" : "bg-red-500 text-white shadow-sm"; 
+                            txt = isC ? "✓" : "✕"; 
                         } else {
-                            cls += "bg-slate-100 text-slate-300"; txt = "•";
+                            cls += "bg-blue-500 text-white shadow-sm"; 
+                            txt = "✓"; 
                         }
-                        tr.innerHTML += `<td class="p-1 border-l border-slate-50"><div class="${cls}">${txt}</div></td>`;
-                    });
+                    } else {
+                        cls += "bg-slate-100 text-slate-300"; txt = "•";
+                    }
+                    tr.innerHTML += `<td class="p-1 border-l border-slate-50 min-w-[30px]"><div class="${cls}">${txt}</div></td>`;
                 }
                 tbody.appendChild(tr);
             });
@@ -558,7 +557,6 @@
         function updateLeaderboardAndFailList() {
             const submitted = allResults.filter(s => s.status === 'submitted');
             
-            // Leaderboard (Top 5 Passers)
             const ranked = [...submitted].sort((a,b) => b.score - a.score || a.timeTaken - b.timeTaken).slice(0, 5);
             const lDiv = document.getElementById('leaderboard-list'); lDiv.innerHTML = '';
             if(!ranked.length) { lDiv.innerHTML = '<div class="text-center opacity-50 w-full py-2 text-xs">ไม่มีข้อมูล</div>'; }
@@ -577,7 +575,6 @@
                 });
             }
 
-            // Fail List (< 80%)
             const fails = [...submitted].filter(s => s.score < PASS_SCORE);
             const fDiv = document.getElementById('fail-list'); fDiv.innerHTML = '';
             document.getElementById('fail-count').innerText = fails.length;
@@ -596,7 +593,6 @@
             }
         }
 
-        // --- QUESTION DETAILS ---
         function openQuestionDetail(index) {
             currentDetailQuestionIndex = index; showDetailResults = false;
             show('page-question-detail'); renderQuestionDetail();
@@ -613,8 +609,7 @@
             
             let counts = [0, 0, 0, 0], totalAnswered = 0, correctCount = 0;
             allResults.forEach(s => {
-                if (!s.answers) return;
-                const ansIdx = s.answers[currentDetailQuestionIndex];
+                const ansIdx = (s.answers && s.answers.length > currentDetailQuestionIndex) ? s.answers[currentDetailQuestionIndex] : null;
                 if(ansIdx !== null && ansIdx !== undefined) {
                     counts[ansIdx]++; totalAnswered++; if(ansIdx === q.a) correctCount++;
                 }
@@ -657,7 +652,6 @@
         document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
         document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < MASTER_QUESTIONS.length - 1) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
 
-
         // --- SEND TO TRAINING WEB API ---
         document.getElementById('btn-send-training').onclick = async () => {
             const submitted = allResults.filter(s => s.status === 'submitted');
@@ -670,49 +664,31 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังส่ง...';
             btn.disabled = true;
 
-            let successCount = 0;
-            let failCount = 0;
+            let successCount = 0; let failCount = 0;
 
             for (const s of submitted) {
                 const payload = {
-                    employeeId: s.studentId,
-                    name: s.name,
-                    department: s.dept,
-                    courseName: "Basic Electronics",
-                    passScore: null,
-                    failScore: null
+                    employeeId: s.studentId, name: s.name, department: s.dept, courseName: "Basic Electronics",
+                    passScore: null, failScore: null
                 };
 
                 if (s.firstScore !== undefined && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
-                    payload.passScore = s.score;
-                    payload.failScore = s.firstScore;
-                } else if (s.score >= PASS_SCORE) {
-                    payload.passScore = s.score;
-                } else {
-                    payload.failScore = s.score;
-                }
+                    payload.passScore = s.score; payload.failScore = s.firstScore;
+                } else if (s.score >= PASS_SCORE) { payload.passScore = s.score; } 
+                else { payload.failScore = s.score; }
 
                 try {
-                    const response = await fetch(TRAINING_WEB_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    await fetch(TRAINING_WEB_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     successCount++;
-                } catch (error) {
-                    console.error("Failed to send:", s.studentId, error);
-                    failCount++;
-                }
+                } catch (error) { failCount++; }
             }
 
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
+            btn.innerHTML = originalHtml; btn.disabled = false;
             showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
         };
 
 
-        // --- STUDENT SYSTEM (v17.0 Data Fix) ---
+        // --- STUDENT SYSTEM ---
         async function fetchStudents() { 
             if(studentCache) return studentCache; 
             try {
@@ -720,11 +696,7 @@
                 if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
                 const csv = await res.text(); 
                 return new Promise((resolve, reject) => {
-                    Papa.parse(csv, {
-                        header:true, skipEmptyLines:true, 
-                        complete: res => resolve(res.data),
-                        error: err => reject(err)
-                    });
+                    Papa.parse(csv, { header:true, skipEmptyLines:true, complete: res => resolve(res.data), error: err => reject(err) });
                 });
             } catch (error) { throw error; }
         }
@@ -733,24 +705,14 @@
             const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
             try {
                 const list = await fetchStudents(); 
-                
-                // ค้นหาโดยไม่สนใจเลข 0 นำหน้า และใช้คอลัมน์ 'EN'
                 const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
                 
                 if(s) { 
-                    // ใช้คอลัมน์ 'NAME - SURNAME'
                     const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                    document.getElementById('preview-name').innerText = fullName; 
-                    
-                    // หาคอลัมน์แผนก (เผื่อว่าชื่อภาษาอังกฤษคือ DEPT หรือ Department)
                     const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
-                    document.getElementById('preview-dept').innerText = deptStr; 
-                    
-                    document.getElementById('student-preview').classList.remove('hidden'); 
-                    studentCache = list; 
-                } else {
-                    document.getElementById('student-preview').classList.add('hidden'); 
-                }
+                    document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = deptStr; 
+                    document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
+                } else document.getElementById('student-preview').classList.add('hidden'); 
             } catch(e) {}
         });
 
@@ -765,14 +727,13 @@
                 if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
 
                 let list;
-                try { list = await fetchStudents(); } 
-                catch(err) { showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); return; }
+                try { list = await fetchStudents(); } catch(err) { showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); return; }
 
                 const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
                 if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
 
                 const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                const exactId = String(s['EN']); // เก็บ EN ตามที่พิมพ์มาใน Sheet เป๊ะๆ
+                const exactId = String(s['EN']); 
                 const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
 
                 currentStudent = { id: exactId, name: fullName, dept: deptStr, startTime: Date.now() };
@@ -785,9 +746,7 @@
                     if(prevScore >= PASS_SCORE) {
                         showModal(`คุณทำแบบทดสอบผ่านแล้วด้วยคะแนน ${prevScore.toFixed(0)}%\nไม่จำเป็นต้องสอบใหม่`); return;
                     } else {
-                        if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${prevScore.toFixed(0)}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) {
-                            return;
-                        }
+                        if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${prevScore.toFixed(0)}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) return;
                         previousData = existing.data();
                     }
                 }
@@ -797,9 +756,7 @@
                     status: 'online', score: null, answers: new Array(40).fill(null) 
                 };
 
-                if (previousData) {
-                    initData.firstScore = previousData.firstScore !== undefined ? previousData.firstScore : previousData.score;
-                }
+                if (previousData) initData.firstScore = previousData.firstScore !== undefined ? previousData.firstScore : previousData.score;
 
                 await setDoc(doc(studentsRef, currentStudent.id), initData); 
                 setupRandomQuestions(true); 
@@ -815,8 +772,7 @@
             const storageKey = `rba_order_${currentStudent.id}`; const orderKey = `rba_opts_order_${currentStudent.id}`;
             
             if(!forceReshuffle && localStorage.getItem(storageKey)) { 
-                studentQuestions = JSON.parse(localStorage.getItem(storageKey)).map(i => qs[i]); 
-                studentOptionOrders = JSON.parse(localStorage.getItem(orderKey)); 
+                studentQuestions = JSON.parse(localStorage.getItem(storageKey)).map(i => qs[i]); studentOptionOrders = JSON.parse(localStorage.getItem(orderKey)); 
             } else { 
                 for (let i = 39; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [qs[i], qs[j]] = [qs[j], qs[i]]; } 
                 studentQuestions = qs; studentOptionOrders = {}; 
@@ -825,8 +781,7 @@
                     if(q.opts && q.opts.length === 4) { for (let i = 3; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; } }
                     studentOptionOrders[q.originalIndex] = opts; 
                 }); 
-                localStorage.setItem(storageKey, JSON.stringify(studentQuestions.map(q => q.originalIndex))); 
-                localStorage.setItem(orderKey, JSON.stringify(studentOptionOrders)); 
+                localStorage.setItem(storageKey, JSON.stringify(studentQuestions.map(q => q.originalIndex))); localStorage.setItem(orderKey, JSON.stringify(studentOptionOrders)); 
             }
             currentQIndex = 0; studentAnswersMap = {};
         }
@@ -858,9 +813,7 @@
             
             const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
             let payload = { answers: masterArray };
-            if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
-                payload.firstScore = docSnap.data().firstScore;
-            }
+            if(docSnap.exists() && docSnap.data().firstScore !== undefined) payload.firstScore = docSnap.data().firstScore;
             await updateDoc(doc(studentsRef, currentStudent.id), payload); 
         };
         
@@ -877,11 +830,8 @@
             
             const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
             let payload = { answers: masterArray, score: finalScore, status: 'submitted', timeTaken: (Date.now() - currentStudent.startTime)/1000 };
-            if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
-                payload.firstScore = docSnap.data().firstScore;
-            } else {
-                payload.firstScore = finalScore; 
-            }
+            if(docSnap.exists() && docSnap.data().firstScore !== undefined) payload.firstScore = docSnap.data().firstScore;
+            else payload.firstScore = finalScore; 
 
             await updateDoc(doc(studentsRef, currentStudent.id), payload);
             
@@ -917,7 +867,10 @@
         document.getElementById('btn-dl-excel').onclick = () => {
             const data = allResults.map((s, i) => { 
                 const row = { "ลำดับ": i+1, "รหัส": s.studentId, "ชื่อ-สกุล": s.name, "แผนก": s.dept, "คะแนนครั้งแรก(%)": s.firstScore||0, "คะแนนล่าสุด(%)": s.score || 0 }; 
-                if(s.answers) { s.answers.forEach((ans, idx) => { row[`ข้อ ${idx+1}`] = (ans === MASTER_QUESTIONS[idx].a) ? "ถูก" : (ans === null ? "ไม่ตอบ" : "ผิด"); }); }
+                for (let idx = 0; idx < MASTER_QUESTIONS.length; idx++) {
+                    const ans = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
+                    row[`ข้อ ${idx+1}`] = (ans === MASTER_QUESTIONS[idx].a) ? "ถูก" : (ans === null ? "ไม่ตอบ" : "ผิด"); 
+                }
                 return row; 
             });
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
