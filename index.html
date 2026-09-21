@@ -364,7 +364,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCr08U5KYGvxXu-DZ5qZOyVnU_1MJ-oY50", 
@@ -527,26 +527,29 @@
                 }
                 tr.innerHTML += `<td class="p-3 whitespace-nowrap sticky-col-3 group-hover:bg-slate-50">${nameHTML}</td>`;
                 
-                tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-sky-200 bg-sky-50 text-sky-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
+                tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-cyan-200 bg-cyan-50 text-cyan-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
                 
                 let scoreColor = s.score >= PASS_SCORE ? 'text-emerald-600' : 'text-red-600';
                 tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
                 
+                // บังคับวนลูป 40 ช่องเสมอ
                 for (let idx = 0; idx < MASTER_QUESTIONS.length; idx++) {
                     const ansIdx = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
-                    let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold ";
+                    let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold transition-all ";
                     let txt = "";
+                    
                     if (ansIdx !== null && ansIdx !== undefined) { 
                         if(showAnswers) { 
                             const isC = (ansIdx === MASTER_QUESTIONS[idx].a); 
                             cls += isC ? "bg-emerald-500 text-white shadow-sm" : "bg-red-500 text-white shadow-sm"; 
                             txt = isC ? "✓" : "✕"; 
                         } else {
-                            cls += "bg-blue-500 text-white shadow-sm"; 
-                            txt = "✓"; 
+                            cls += "bg-cyan-500 text-white shadow-sm"; 
+                            txt = "✓"; // แสดงเครื่องหมายถูกสีฟ้าถ้าทำแล้วแต่ยังไม่ส่ง
                         }
                     } else {
-                        cls += "bg-slate-100 text-slate-300"; txt = "•";
+                        cls += "bg-slate-100 text-slate-300"; 
+                        txt = "•";
                     }
                     tr.innerHTML += `<td class="p-1 border-l border-slate-50 min-w-[30px]"><div class="${cls}">${txt}</div></td>`;
                 }
@@ -696,7 +699,11 @@
                 if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
                 const csv = await res.text(); 
                 return new Promise((resolve, reject) => {
-                    Papa.parse(csv, { header:true, skipEmptyLines:true, complete: res => resolve(res.data), error: err => reject(err) });
+                    Papa.parse(csv, {
+                        header:true, skipEmptyLines:true, 
+                        complete: res => resolve(res.data),
+                        error: err => reject(err)
+                    });
                 });
             } catch (error) { throw error; }
         }
@@ -773,6 +780,14 @@
             
             if(!forceReshuffle && localStorage.getItem(storageKey)) { 
                 studentQuestions = JSON.parse(localStorage.getItem(storageKey)).map(i => qs[i]); studentOptionOrders = JSON.parse(localStorage.getItem(orderKey)); 
+                
+                // โหลดคำตอบเดิมกลับมาแสดง
+                const existingAnswers = localStorage.getItem(`rba_answers_${currentStudent.id}`);
+                if(existingAnswers) {
+                    studentAnswersMap = JSON.parse(existingAnswers);
+                } else {
+                    studentAnswersMap = {};
+                }
             } else { 
                 for (let i = 39; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [qs[i], qs[j]] = [qs[j], qs[i]]; } 
                 studentQuestions = qs; studentOptionOrders = {}; 
@@ -781,9 +796,12 @@
                     if(q.opts && q.opts.length === 4) { for (let i = 3; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; } }
                     studentOptionOrders[q.originalIndex] = opts; 
                 }); 
-                localStorage.setItem(storageKey, JSON.stringify(studentQuestions.map(q => q.originalIndex))); localStorage.setItem(orderKey, JSON.stringify(studentOptionOrders)); 
+                localStorage.setItem(storageKey, JSON.stringify(studentQuestions.map(q => q.originalIndex))); 
+                localStorage.setItem(orderKey, JSON.stringify(studentOptionOrders)); 
+                localStorage.removeItem(`rba_answers_${currentStudent.id}`);
+                studentAnswersMap = {};
             }
-            currentQIndex = 0; studentAnswersMap = {};
+            currentQIndex = 0; 
         }
 
         function renderQuestion() {
@@ -808,13 +826,23 @@
         }
 
         window.selectAnswer = async (val) => { 
-            studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; renderQuestion(); 
-            const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
-            
-            const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
-            let payload = { answers: masterArray };
-            if(docSnap.exists() && docSnap.data().firstScore !== undefined) payload.firstScore = docSnap.data().firstScore;
-            await updateDoc(doc(studentsRef, currentStudent.id), payload); 
+            try {
+                // บันทึกคำตอบใน Object ของฝั่งนักเรียนและ Render หน้าจอ
+                studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; 
+                localStorage.setItem(`rba_answers_${currentStudent.id}`, JSON.stringify(studentAnswersMap));
+                renderQuestion(); 
+                
+                // เตรียม Payload แบบ Array เติม null ไว้ก่อน
+                const masterArray = new Array(40).fill(null); 
+                for(let i=0; i<40; i++) { 
+                    if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; 
+                } 
+                
+                // ใช้ setDoc พร้อม Merge: true ยิงข้อมูลเข้า Firebase ทันที ไม่ต้องดึง getDoc ก่อน
+                await setDoc(doc(studentsRef, currentStudent.id), { answers: masterArray }, { merge: true }); 
+            } catch (err) {
+                console.error("Error saving answer:", err);
+            }
         };
         
         document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
