@@ -95,11 +95,11 @@
                     Basic Electronics <br> <span class="neon-text">Exam System</span>
                 </h1>
                 <p class="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 float-up delay-1">
-                    ระบบทดสอบความรู้พื้นฐานทางด้านอิเล็กทรอนิกส์ สำหรับพนักงาน เข้าระบบโดยใช้รหัสประจำตัวพนักงานเพื่อเข้าสู่ระบบ
+                    ระบบทดสอบความรู้พื้นฐานทางด้านอิเล็กทรอนิกส์ เข้าระบบโดยใช้รหัสประจำตัวพนักงาน
                 </p>
                 <div class="flex flex-col sm:flex-row gap-5 float-up delay-2">
                     <button id="btn-go-student" class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-10 py-4 rounded-full font-bold text-lg transition shadow-[0_0_15px_rgba(0,240,255,0.4)]">
-                        <i class="fa-solid fa-play mr-2"></i> เข้าสู่ระบบสอบ
+                        <i class="fa-solid fa-play mr-2"></i> เข้าระบบสอบ
                     </button>
                     <button id="btn-go-teacher" class="bg-transparent border-2 border-cyan-500 text-cyan-400 hover:bg-cyan-900/50 px-10 py-4 rounded-full font-bold text-lg transition">
                         <i class="fa-solid fa-chalkboard-user mr-2"></i> สำหรับผู้คุมสอบ
@@ -380,7 +380,7 @@
         };
 
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
-        const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/"; // ⚠️ เป้าหมายการส่งข้อมูล
+        const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/";
         const TEACHER_CODE = "056894";
         const PASS_SCORE = 80;
         let sysIsOpen = false;
@@ -438,7 +438,7 @@
                 db = initializeFirestore(app, { experimentalForceLongPolling: true });
                 auth = getAuth(app);
                 configRef = doc(db, 'bec_config_v13', 'main'); 
-                studentsRef = collection(db, 'bec_students_v13'); // ใช้ Database เดิมเพื่อเก็บคะแนนใหม่
+                studentsRef = collection(db, 'bec_students_v13');
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
@@ -524,7 +524,6 @@
                 tr.innerHTML += `<td class="p-3 text-center text-slate-400 text-xs sticky-col-1 group-hover:bg-slate-50">${i+1}</td>`;
                 tr.innerHTML += `<td class="p-3 text-center font-mono font-bold text-slate-700 text-sm sticky-col-2 group-hover:bg-slate-50">${s.studentId}</td>`;
                 
-                // Show if they have a firstScore (meaning they retook the exam)
                 let nameHTML = `<div class="font-bold text-slate-800 text-sm">${showNames ? s.name : '***'}</div><div class="text-xs text-slate-400">${s.dept}</div>`;
                 if(s.firstScore !== undefined && s.firstScore !== s.score) {
                     nameHTML += `<div class="text-[10px] text-orange-500 mt-0.5">เคยสอบได้: ${s.firstScore.toFixed(0)}%</div>`;
@@ -533,7 +532,6 @@
                 
                 tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-sky-200 bg-sky-50 text-sky-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
                 
-                // Color code score
                 let scoreColor = s.score >= PASS_SCORE ? 'text-emerald-600' : 'text-red-600';
                 tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score.toFixed(0)+'%' : '-'}</td>`;
                 
@@ -598,7 +596,7 @@
             }
         }
 
-        // --- QUESTION DETAILS (Same as before) ---
+        // --- QUESTION DETAILS ---
         function openQuestionDetail(index) {
             currentDetailQuestionIndex = index; showDetailResults = false;
             show('page-question-detail'); renderQuestionDetail();
@@ -665,7 +663,7 @@
             const submitted = allResults.filter(s => s.status === 'submitted');
             if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
 
-            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?\n\n*หมายเหตุ: หากคุณทดสอบบนเครื่องส่วนตัว อาจมีการแจ้งเตือนความปลอดภัยเนื่องจากส่งข้อมูลข้ามโปรโตคอล (HTTPS -> HTTP)`)) return;
+            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?`)) return;
 
             const btn = document.getElementById('btn-send-training');
             const originalHtml = btn.innerHTML;
@@ -676,7 +674,6 @@
             let failCount = 0;
 
             for (const s of submitted) {
-                // Prepare payload format for destination server
                 const payload = {
                     employeeId: s.studentId,
                     name: s.name,
@@ -686,30 +683,22 @@
                     failScore: null
                 };
 
-                // Logic 80% criteria
                 if (s.firstScore !== undefined && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
-                    // สอบแก้ตัวผ่าน
                     payload.passScore = s.score;
                     payload.failScore = s.firstScore;
                 } else if (s.score >= PASS_SCORE) {
-                    // ผ่านตั้งแต่แรก
                     payload.passScore = s.score;
                 } else {
-                    // ไม่ผ่าน
                     payload.failScore = s.score;
                 }
 
                 try {
                     const response = await fetch(TRAINING_WEB_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // Need this because destination is likely not setting CORS headers
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        mode: 'no-cors', 
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    
-                    // Since it's no-cors, we can't read the exact response, assume success if fetch didn't throw
                     successCount++;
                 } catch (error) {
                     console.error("Failed to send:", s.studentId, error);
@@ -719,12 +708,11 @@
 
             btn.innerHTML = originalHtml;
             btn.disabled = false;
-            
             showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
         };
 
 
-        // --- STUDENT SYSTEM ---
+        // --- STUDENT SYSTEM (v17.0 Data Fix) ---
         async function fetchStudents() { 
             if(studentCache) return studentCache; 
             try {
@@ -745,13 +733,24 @@
             const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
             try {
                 const list = await fetchStudents(); 
-                // ค้นหาโดยไม่สนใจเลข 0 ข้างหน้า
-                const s = list.find(x => String(x['รหัสประจำตัว']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                
+                // ค้นหาโดยไม่สนใจเลข 0 นำหน้า และใช้คอลัมน์ 'EN'
+                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                
                 if(s) { 
-                    const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
-                    document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = s['แผนก']; 
-                    document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
-                } else document.getElementById('student-preview').classList.add('hidden'); 
+                    // ใช้คอลัมน์ 'NAME - SURNAME'
+                    const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
+                    document.getElementById('preview-name').innerText = fullName; 
+                    
+                    // หาคอลัมน์แผนก (เผื่อว่าชื่อภาษาอังกฤษคือ DEPT หรือ Department)
+                    const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
+                    document.getElementById('preview-dept').innerText = deptStr; 
+                    
+                    document.getElementById('student-preview').classList.remove('hidden'); 
+                    studentCache = list; 
+                } else {
+                    document.getElementById('student-preview').classList.add('hidden'); 
+                }
             } catch(e) {}
         });
 
@@ -769,17 +768,16 @@
                 try { list = await fetchStudents(); } 
                 catch(err) { showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); return; }
 
-                // ค้นหาแบบยืดหยุ่น (ตัดเลข 0 ข้างหน้าออกเทียบกัน)
-                const s = list.find(x => String(x['รหัสประจำตัว']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
-                if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ");
+                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
 
-                const fullName = s['ชื่อ- นามสกุล'] || s['ชื่อ-นามสกุล'] || s['ชื่อ - นามสกุล'] || (s['ชื่อ'] ? s['ชื่อ'] + " " + (s['นามสกุล'] || "") : "ไม่ระบุชื่อ");
-                // เก็บ ID ให้ตรงกับฐานข้อมูลเป๊ะๆ
-                const exactId = String(s['รหัสประจำตัว']);
-                currentStudent = { id: exactId, name: fullName, dept: s['แผนก'], startTime: Date.now() };
+                const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
+                const exactId = String(s['EN']); // เก็บ EN ตามที่พิมพ์มาใน Sheet เป๊ะๆ
+                const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
+
+                currentStudent = { id: exactId, name: fullName, dept: deptStr, startTime: Date.now() };
                 
                 const existing = await getDoc(doc(studentsRef, currentStudent.id));
-                
                 let previousData = null;
 
                 if(existing.exists() && existing.data().status === 'submitted') {
@@ -787,28 +785,24 @@
                     if(prevScore >= PASS_SCORE) {
                         showModal(`คุณทำแบบทดสอบผ่านแล้วด้วยคะแนน ${prevScore.toFixed(0)}%\nไม่จำเป็นต้องสอบใหม่`); return;
                     } else {
-                        // สอบไม่ผ่าน อนุญาตให้สอบใหม่ได้
                         if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${prevScore.toFixed(0)}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) {
                             return;
                         }
-                        // เก็บข้อมูลเดิมไว้
                         previousData = existing.data();
                     }
                 }
                 
-                // ถ้ายอมสอบใหม่ หรือสอบครั้งแรก
                 let initData = { 
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, answers: new Array(40).fill(null) 
                 };
 
-                // ถ้ามีประวัติคะแนนเดิม ให้เก็บ firstScore ไว้
                 if (previousData) {
                     initData.firstScore = previousData.firstScore !== undefined ? previousData.firstScore : previousData.score;
                 }
 
                 await setDoc(doc(studentsRef, currentStudent.id), initData); 
-                setupRandomQuestions(true); // บังคับสุ่มใหม่
+                setupRandomQuestions(true); 
                 
                 document.getElementById('exam-student-name').innerText = currentStudent.name; 
                 document.getElementById('exam-student-dept').innerText = currentStudent.dept;
@@ -854,7 +848,7 @@
             const optsContainer = document.getElementById('options-container'); optsContainer.innerHTML = '';
             studentOptionOrders[q.originalIndex].forEach((origIdx, i) => { 
                 const isS = studentAnswersMap[q.originalIndex] === origIdx; 
-                optsContainer.innerHTML += `<div onclick="selectAnswer(${origIdx})" class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all group ${isS ? 'border-sky-500 bg-sky-50 shadow-md' : 'border-slate-100 hover:border-sky-300 hover:bg-slate-50'}"><div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 ${isS ? 'bg-sky-500 border-sky-500 text-white' : 'border-slate-300 bg-white group-hover:border-sky-300'}">${isS ? '✓' : String.fromCharCode(65 + i)}</div><span class="text-lg font-medium ${isS ? 'text-sky-800' : 'text-slate-700'}">${q.opts[origIdx]}</span></div>`; 
+                optsContainer.innerHTML += `<div onclick="selectAnswer(${origIdx})" class="flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all group ${isS ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 hover:border-cyan-300 hover:bg-slate-50'}"><div class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 ${isS ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-slate-300 bg-white group-hover:border-cyan-300'}">${isS ? '✓' : String.fromCharCode(65 + i)}</div><span class="text-lg font-medium ${isS ? 'text-cyan-800' : 'text-slate-700'}">${q.opts[origIdx]}</span></div>`; 
             });
         }
 
@@ -862,7 +856,6 @@
             studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; renderQuestion(); 
             const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
             
-            // Get current doc to preserve firstScore if it exists
             const docSnap = await getDoc(doc(studentsRef, currentStudent.id));
             let payload = { answers: masterArray };
             if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
@@ -887,7 +880,7 @@
             if(docSnap.exists() && docSnap.data().firstScore !== undefined) {
                 payload.firstScore = docSnap.data().firstScore;
             } else {
-                payload.firstScore = finalScore; // เซฟคะแนนครั้งแรก
+                payload.firstScore = finalScore; 
             }
 
             await updateDoc(doc(studentsRef, currentStudent.id), payload);
