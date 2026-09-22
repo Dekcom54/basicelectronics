@@ -122,11 +122,11 @@
                 <div class="flex items-center gap-6">
                     <label class="flex items-center cursor-pointer group">
                         <div class="relative">
-                            <input type="checkbox" id="toggle-system" class="sr-only" checked>
-                            <div id="toggle-bg" class="block bg-emerald-500 w-14 h-8 rounded-full transition-colors duration-300"></div>
-                            <div id="toggle-dot" class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 shadow-md transform translate-x-6"></div>
+                            <input type="checkbox" id="toggle-system" class="sr-only">
+                            <div id="toggle-bg" class="block bg-slate-300 w-14 h-8 rounded-full transition-colors duration-300"></div>
+                            <div id="toggle-dot" class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 shadow-md transform"></div>
                         </div>
-                        <div class="ml-3 font-bold text-emerald-600" id="txt-system-status">เปิดรับคำตอบแล้ว</div>
+                        <div class="ml-3 font-bold text-slate-500" id="txt-system-status">ปิดรับคำตอบ</div>
                     </label>
                     <div class="h-8 w-px bg-slate-200"></div>
                     <button onclick="window.location.reload()" class="text-slate-400 hover:text-red-500 font-bold transition flex items-center gap-2">
@@ -332,14 +332,17 @@
 
     <!-- MAIN SCRIPT (Zero Firebase) -->
     <script>
+        // URL จาก Google Apps Script (ตัวกลาง)
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwzB8pxVWrdSwhDkgwUWr2nN9k_3YcEUvOtcA7fFnbHz5UKaN1ksAAl0NTHRzfwUx3uSw/exec"; 
+        
+        // URL สำหรับเช็ครายชื่อนักเรียน
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
+        
+        // URL ปลายทางที่ต้องการส่ง API (Training Record)
         const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/";
+        
         const TEACHER_CODE = "056894";
         const PASS_SCORE = 80;
-
-        // ไม่บล็อกการเข้าสอบจากฝั่ง Firebase แล้ว ให้ถือว่าระบบเปิดเสมอ
-        let sysIsOpen = true;
 
         const MASTER_QUESTIONS = [
             { t: "อุปกรณ์ที่มีหน้าที่จำกัดการไหลของกระแสไฟฟ้าในวงจร คือ", opts: ["ขดลวด", "ตัวเก็บประจุ", "ตัวต้านทาน", "หม้อแปลง"], a: 2 }, 
@@ -388,6 +391,7 @@
         let studentQuestions = [], studentAnswersMap = {}, currentQIndex = 0;
         let studentOptionOrders = {}, currentDetailQuestionIndex = 0, showDetailResults = false;
         let dashboardInterval = null;
+        let sysIsOpen = true;
 
         // ฟังก์ชันระบบพื้นฐาน
         window.forceReset = () => {
@@ -408,7 +412,7 @@
             document.getElementById('message-modal').classList.add('flex');
         };
 
-        // เริ่มต้นการทำงาน ปิดฉากโหลดทันที (Zero Firebase)
+        // ปิดหน้าจอโหลดเมื่อเริ่มระบบ (Zero Firebase)
         function init() {
             document.getElementById('loading-overlay').style.display = 'none';
         }
@@ -429,7 +433,7 @@
         };
         document.getElementById('btn-back-dashboard').onclick = () => { show('page-teacher-dashboard'); showDetailResults = false; };
 
-        // --- TEACHER SYSTEM (ใช้ GAS แทน Firebase) ---
+        // --- TEACHER SYSTEM (ใช้ Google Apps Script แทน) ---
         function initTeacherDashboard() {
             const thead = document.getElementById('grid-header-row');
             thead.innerHTML = `<th class="p-3 border-b text-center sticky-col-1">#</th><th class="p-3 border-b text-center sticky-col-2 w-24">EN</th><th class="p-3 border-b min-w-[200px] sticky-col-3">ชื่อ-สกุล</th><th class="p-3 border-b text-center w-20">สถานะ</th><th class="p-3 border-b text-center w-16 font-black text-cyan-600">%</th>`;
@@ -439,23 +443,31 @@
                 th.innerText = i + 1; th.onclick = () => openQuestionDetail(i); thead.appendChild(th);
             });
 
-            // จำลองสวิตช์เปิดปิดให้ขยับได้ในเครื่องครู (แต่ไม่ได้ยิงไปบล็อกฝั่งนักเรียนแล้ว)
+            // เชื่อมสวิตช์เปิดปิดกับ Google Sheet
             const toggleBg = document.getElementById('toggle-bg');
             const toggleDot = document.getElementById('toggle-dot');
             const txtStatus = document.getElementById('txt-system-status');
             const sysCheckbox = document.getElementById('toggle-system');
 
-            sysCheckbox.addEventListener('change', (e) => {
-                sysIsOpen = sysCheckbox.checked;
-                if(sysIsOpen) {
+            sysCheckbox.addEventListener('change', async (e) => {
+                const isOpen = sysCheckbox.checked;
+                if(isOpen) {
                     toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
                     toggleDot.classList.add('translate-x-6');
                     txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
                 } else {
                     toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
                     toggleDot.classList.remove('translate-x-6');
-                    txtStatus.textContent = 'ปิดรับคำตอบ (เฉพาะในเครื่องนี้)'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+                    txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
                 }
+                
+                // สั่งเซฟการเปิดปิดระบบลง Google Sheet
+                fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "setSystemStatus", isOpen: isOpen })
+                });
             });
 
             document.getElementById('toggle-answers').onchange = () => renderGrid();
@@ -468,8 +480,30 @@
         async function fetchDashboardData() {
             try {
                 if(!GAS_URL) return;
-                const res = await fetch(GAS_URL);
-                allResults = await res.json();
+                // ใส่ ?t=... เพื่อกันเบราว์เซอร์จำค่าเก่า (Cache)
+                const res = await fetch(GAS_URL + "?t=" + new Date().getTime());
+                const data = await res.json();
+                
+                // อัปเดตสถานะเปิดปิดระบบของครูตาม Sheet
+                sysIsOpen = data.systemIsOpen;
+                const sysCheckbox = document.getElementById('toggle-system');
+                if(sysCheckbox.checked !== sysIsOpen) {
+                    sysCheckbox.checked = sysIsOpen;
+                    const toggleBg = document.getElementById('toggle-bg');
+                    const toggleDot = document.getElementById('toggle-dot');
+                    const txtStatus = document.getElementById('txt-system-status');
+                    if(sysIsOpen) {
+                        toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
+                        toggleDot.classList.add('translate-x-6');
+                        txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
+                    } else {
+                        toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
+                        toggleDot.classList.remove('translate-x-6');
+                        txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+                    }
+                }
+
+                allResults = data.students;
                 renderGrid(); 
                 updateLeaderboardAndFailList();
                 if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
@@ -695,7 +729,20 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
 
             try {
-                if(!sysIsOpen) { showModal("ขณะนี้ระบบห้องสอบยังไม่เปิดให้บริการ\nโปรดรอประกาศจากผู้ควบคุม"); return; }
+                // เช็คสถานะระบบก่อนเลยจาก Google App Script
+                let gasDataObj = { systemIsOpen: true, students: [] };
+                try {
+                    const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
+                    gasDataObj = await gasRes.json();
+                } catch(err) {
+                    console.warn("Could not fetch initial GAS data", err);
+                }
+
+                if(gasDataObj.systemIsOpen === false) { 
+                    showModal("ขณะนี้ระบบห้องสอบปิดรับคำตอบ\nโปรดรอประกาศจากผู้ควบคุม"); 
+                    return; 
+                }
+
                 const rawId = document.getElementById('student-id').value.trim();
                 if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
 
@@ -709,15 +756,7 @@
                 const exactId = String(s['EN']); 
                 const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
 
-                let gasData = [];
-                try {
-                    const gasRes = await fetch(GAS_URL);
-                    gasData = await gasRes.json();
-                } catch(err) {
-                    console.warn("Could not fetch initial GAS data", err);
-                }
-
-                const existing = gasData.find(x => String(x.studentId) === exactId);
+                const existing = gasDataObj.students.find(x => String(x.studentId) === exactId);
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
@@ -735,11 +774,12 @@
                     firstScore: previousData ? (previousData.firstScore !== undefined ? previousData.firstScore : previousData.score) : undefined
                 };
                 
+                // แจ้งเตือนครูว่ามีคนล็อกอินเข้ามาทำ (ส่งข้อมูลไปเซฟบรรทัดใหม่ หรืออัปเดต)
                 const initPayload = {
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, firstScore: currentStudent.firstScore, answers: new Array(40).fill(null)
                 };
-                fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
+                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
 
                 setupRandomQuestions(); 
                 
