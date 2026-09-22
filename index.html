@@ -333,7 +333,7 @@
         </div>
     </div>
 
-    <!-- MAIN SCRIPT -->
+    <!-- MAIN SCRIPT (100% Google Apps Script Integration) -->
     <script>
         // ==============================================================
         // ตั้งค่าตัวแปรหลัก
@@ -428,7 +428,7 @@
             if(id === 'page-teacher-dashboard') document.getElementById(id).style.display = 'block';
         };
 
-        // เมื่อโหลดหน้าเว็บเสร็จ ให้ปิดฉากโหลดทันที
+        // เมื่อโหลดหน้าเว็บเสร็จ ให้ปิดฉากโหลดทันที (Zero Firebase)
         window.onload = function() {
             document.getElementById('loading-overlay').style.display = 'none';
         };
@@ -885,7 +885,7 @@
             studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; renderQuestion(); 
             const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
             
-            // ส่งคำตอบปัจจุบันแบบเบื้องหลัง
+            // ส่งคำตอบปัจจุบันแบบเบื้องหลัง (ไม่ต้องสนการเปลี่ยนข้อ)
             const payload = {
                 studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept,
                 status: 'online', firstScore: currentStudent.firstScore, score: null, answers: masterArray
@@ -959,9 +959,4 @@
                 }
                 return row; 
             });
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
-        };
-
-    </script>
-</body>
-</html>
+            const
