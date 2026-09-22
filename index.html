@@ -349,6 +349,74 @@
         let studentOptionOrders = {}, currentDetailQuestionIndex = 0, showDetailResults = false;
         let dashboardInterval = null;
 
+        const MASTER_QUESTIONS = [
+            { t: "อุปกรณ์ที่มีหน้าที่จำกัดการไหลของกระแสไฟฟ้าในวงจร คือ", opts: ["ขดลวด", "ตัวเก็บประจุ", "ตัวต้านทาน", "หม้อแปลง"], a: 2 }, 
+            { t: "อุปกรณ์อิเล็กทรอนิกส์ชนิดใด ที่ทำหน้าที่คล้ายกับแหล่งจ่ายไฟฟ้าในวงจร สามารถเก็บ หรือ คายประจุได้", opts: ["ตัวต้านทาน", "ตัวเก็บประจุ", "ตัวเหนี่ยวนำ", "หม้อแปลง"], a: 1 }, 
+            { t: "ตัวต้านทาน มีหน่วยในการวัดคือ", opts: ["โอห์ม", "โวลต์", "เฮนรี่", "แอมแปร์"], a: 0 }, 
+            { t: "ข้อใดเป็นอุปกรณ์อิเล็กทรอนิกส์ที่ผลิตมาจากสารกึ่งตัวนำ", opts: ["ตัวเหนี่ยวนำ", "ตัวเก็บประจุชนิดไมก้า", "ทรานซิสเตอร์", "หม้อแปลง"], a: 2 }, 
+            { t: "ตัวเก็บประจุ ใช้อักษรย่อใน Build Sheet (B/S) ว่าอย่างไร", opts: ["D", "IC", "C", "Q"], a: 2 }, 
+            { t: "ตัวต้านทาน ใช้อักษรย่อใน Build Sheet (B/S) ว่าอย่างไร", opts: ["R", "C", "L", "T"], a: 0 }, 
+            { t: "อุปกรณ์ข้อใด ที่เป็นตัวเก็บประจุแบบ SMD มีแถบสีเพื่อบ่งบอกว่าเป็นขั้วบวก ( + )", opts: ["เซรามิก คาปาฯ", "อิเล็คโทรไลติก คาปาฯ", "ชิบคาปาซิเตอร์", "แทนทาลัม คาปาฯ"], a: 3 }, 
+            { t: "ตัวเหนี่ยวนำมีหน่วยในการวัด คือ", opts: ["โอห์ม", "เฮนรี่", "โวลต์", "แอมแปร์"], a: 1 }, 
+            { t: "อุปกรณ์สารกึ่งตัวนำที่รวบรวมวงจรอิเล็กทรอนิกส์หลายชนิดไว้ในชิบ (Chip) สารกึ่งตัวนำที่เล็กมาก คือ", opts: ["ไดโอด", "ทรานซิสเตอร์", "ไทริสเตอร์", "วงจรรวม (IC)"], a: 3 }, 
+            { t: "อุปกรณ์ที่ใช้ทำหน้าที่เพิ่มหรือลดแรงเคลื่อนไฟฟ้ากระแสสลับ คือ", opts: ["หม้อแปลง", "ตัวเหนี่ยวนำ", "ตัวเก็บประจุ", "ตัวต้านทาน"], a: 0 }, 
+            { t: "ตัวเก็บประจุมีหน่วยการวัด คือ", opts: ["โวลต์", "โอห์ม", "ฟารัด", "แอมแปร์"], a: 2 }, 
+            { t: "อุปกรณ์อิเล็กทรอนิกส์ตัวใดที่ทำหน้าที่เปรียบได้กับวาล์วควบคุมที่ทำงานด้วยไฟฟ้า", opts: ["ตัวเก็บประจุ", "ตัวเหนี่ยวนำ", "ตัวต้านทาน", "ตัวทรานซิสเตอร์"], a: 3 }, 
+            { t: "ตัวเก็บประจุชนิดใดที่ต้องคำนึงถึงขั้วบวก ลบ เสมอเวลาประกอบลงบน แผ่น Board", opts: ["ชนิดเซรามิก", "ชนิดกระดาษ", "ชนิดอิเล็กโทรลิติก", "แวริเอเบิล"], a: 2 }, 
+            { t: "ตัวไดโอดมีหน้าที่ คือ", opts: ["ขยายสัญญาณ", "เครื่องแสดงผล", "ฟิลเตอร์", "ตัวเรียงกระแสโดยให้กระแสผ่านทางเดียว"], a: 3 }, 
+            { t: "ข้อใดเป็นอุปกรณ์ประเภทที่ไม่มีสารกึ่งตัวนำ", opts: ["Diode,Resistor", "LED,Inductor", "Capacitor, Resistor", "Diode, IC"], a: 2 }, 
+            { t: "ตัวเหนี่ยวนำจะใช้อักษรย่อใน Build sheet (B/S) ว่าอย่างไร", opts: ["L", "T", "D", "R"], a: 0 }, 
+            { t: "ตัวอุปกรณ์ที่ทำหน้าที่ขยายสัญญาณหรือขณะเดียวกันก็เป็นสวิทซ์ได้ ใช้อักษรย่อใน Build sheet (B/S) ว่าอย่างไร", opts: ["SW", "D, DR", "T, Q", "I.C, U"], a: 2 }, 
+            { t: "ข้อใดคือความหมายของแผงวงจร หรือแผ่นพิมพ์ลายวงจร", opts: ["PCB", "Board", "Substrate", "ถูกทุกข้อ"], a: 0 }, 
+            { t: "การประกอบตัวอุปกรณ์ (Comp.)ชนิดที่มีขั้วโลหะ (Terminal) เพื่อวางยึดติดบนผิวหน้า PCB เรียกว่าการประกอบงานแบบใด", opts: ["COB", "PTH", "SMD", "ไม่มีข้อถูก"], a: 2 }, 
+            { t: "อุปกรณ์ในข้อใดที่สามารถเปลี่ยนกระแสไฟฟ้าให้เป็นแสงโดยตรง", opts: ["LED (แอล อี ดี)", "Transistor (ทรานซิสเตอร์)", "Resistor (รีซีสเตอร์)", "Capacitor (คาปาซิเตอร์)"], a: 0 }, 
+            { t: "อุปกรณ์ใด ที่นำลวดทองแดงมาพันเป็นขดจำนวนหลายๆ รอบ มีความเหนี่ยวนำทางไฟฟ้าที่เกิดขึ้นในรูปของสนามแม่เหล็ก", opts: ["Resistor (รีซีสเตอร์)", "Capacitor (คาปาซิเตอร์)", "Inductor (อินดัคเตอร์)", "Transistor (ทรานซิสเตอร์)"], a: 2 }, 
+            { t: "อุปกรณ์ในข้อใด ที่ทำหน้าที่เปลี่ยนสัญญาณไฟฟ้า เป็นสัญญาณเสียง แต่จะทำงานได้ต้องอาศัยแรงดันป้อนเข้ามา", opts: ["Inductor (อินดัคเตอร์)", "Capacitor (คาปาซิเตอร์)", "Buzzer (บัชเซอร์)", "Transistor (ทรานซิสเตอร์)"], a: 2 }, 
+            { t: "พื้นที่ ที่อยู่บนพื้นผิวแผงวงจรใช้สำหรับการบัดกรี หรือประกอบตัวอุปกรณ์ต่างๆ เรียกว่าอะไร", opts: ["Component (คอมโพเน้นท์)", "Solder Resist (โซลเดอร์ รีซีส)", "Terminal (เทอร์มินอล)", "Pad, Land (แพด, แลนด์)"], a: 3 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/A.jpg", opts: ["Inductor (ชิบ อินดัคเตอร์)", "Resistor (รีซีสเตอร์)", "Capacitor (คาปาซิเตอร์)", "Diode (ซีเนอร์ ไดโอด)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/B.jpg", opts: ["Connector (คอนเนกเตอร์)", "Integrate Circuit (อินดิเกรทเซอร์กิต)", "Switch (สวิทซ์) ", "Transistor (ทรานซิสเตอร์)"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/C.jpg", opts: ["LED (หลอดเอลอีดี)", "Zener Diode  (ซีเนอร์ ไดโอด)", "Crystal (คริสตอล)", "Buzzer (บัชเซอร์)"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/D.jpg", opts: ["Heatsink (ฮีท ซิงค์)", "Transformer (ทรานฟอเมอร์)", "Buzzer (บัชเซอร์)", "Switch (สวิทซ์)"], a: 2 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/E.jpg", opts: ["Electrolytic Capacitor (อิเล็คโทรไลติกคาปาซิเตอร์)", "Ceramic Capacitor (เซรามิกคาปาซิเตอร์)", "Tantalum Capacitor (แทนทาลัม คาปาซิเตอร์)", "Resistor (รีซีสเตอร์)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/F.jpg", opts: ["Chip Resistor (ชิบ รีซีสเตอร์)", "Chip Capacitor (ชิบ คาปาซิเตอร์)", "Inductor (ชิบ อินดัคเตอร์)", "Diode (ซีเนอร์ ไดโอด)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/G.jpg", opts: ["Connector (คอนเนกเตอร์)", "Heat Sink (ฮีท ซิงค์)", "Transformer (ทรานฟอเมอร์)", "Crystal (คริสตอล)"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/H.jpg", opts: ["Resistor (รีซีสเตอร์)", "Capacitor (คาปาซิเตอร์)", "Crystal (คริสตอล)", "LED (หลอดเอลอีดี)"], a: 2 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/I.jpg", opts: ["Chip Capacitor (ชิบ คาปาซิเตอร์)", "Chip Resistor (ชิบ รีซีสเตอร์)", "Tantalum Capacitor (แทนทาลัม คาปาซิเตอร์)", "Inductor (ชิบ อินดัคเตอร์)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/J.jpg", opts: ["Switch (สวิทซ์)", "Transformer (ทรานฟอเมอร์)", "Buzzer (บัชเซอร์)", "Connector (คอนเนกเตอร์)"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/K.jpg", opts: ["Electrolytic Capacitor", "Tantalum Capacitor (แทนทาลัม คาปาซิเตอร์)", "Ceramic Capacitor", "Resistor"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/L.jpg", opts: ["Switch (สวิทซ์)", "Connector (คอนเนกเตอร์)", "Socket (ซ็อกเก็ต)", "Terminal (เทอร์มินอล)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/M.jpg", opts: ["Diode", "Transistor (ทรานซิสเตอร์)", "IC", "Regulator"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/N.jpg", opts: ["Switch (สวิทซ์)", "Connector (คอนเนกเตอร์)", "Header  (เฮดเดอร์)", "Pin (พิน)"], a: 1 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/O.jpg", opts: ["Resistor (รีซีสเตอร์)", "Diode (ไดโอด)", "Inductor (ชิบ อินดัคเตอร์)", "Fuse (ฟิวส์)"], a: 0 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/P.jpg", opts: ["light (ไลท์)", "Neon (นีออน)", "LED (หลอดเอลอีดี)", "Display (ดีสเพลย์)"], a: 2 }, 
+            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/Q.jpg", opts: ["PCB (พีซีบี)", "Wafer (เวเฟอร์)", "Panel (พาเนล)", "Sheet (ซีส)"], a: 0 }
+        ];
+
+        // --- GLOBAL UI FUNCTIONS ---
+        window.forceReset = () => {
+            if(confirm("ระบบจะล้างค่าการเชื่อมต่อเก่าในเครื่องนี้ ยืนยัน?")) {
+                localStorage.clear(); sessionStorage.clear();
+                window.location.reload(true);
+            }
+        };
+
+        window.closeModal = () => {
+            document.getElementById('message-modal').classList.add('hidden');
+            document.getElementById('message-modal').classList.remove('flex');
+        };
+
+        const showModal = (msg) => {
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('message-modal').classList.remove('hidden');
+            document.getElementById('message-modal').classList.add('flex');
+        };
+
+        const show = (id) => {
+            document.querySelectorAll('.page').forEach(el => el.style.display = 'none');
+            document.getElementById(id).style.display = 'flex';
+            if(id === 'page-teacher-dashboard') document.getElementById(id).style.display = 'block';
+        };
+
         async function init() {
             try {
                 // ดึงข้อมูลสถานะเริ่มต้นจาก Google Apps Script
@@ -356,7 +424,7 @@
                 const data = await res.json();
                 
                 // ตรวจสอบว่าระบบเปิดหรือปิดอยู่
-                if(data.systemIsOpen !== undefined) {
+                if(data && data.systemIsOpen !== undefined) {
                     sysIsOpen = data.systemIsOpen;
                 }
             } catch(e) {
@@ -370,15 +438,50 @@
             }
         }
 
-        // --- BINDING การเปลี่ยนหน้า ---
-        document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
-        document.getElementById('btn-go-student').onclick = () => show('page-student-login');
-        document.getElementById('btn-teacher-login').onclick = () => {
-            if(document.getElementById('teacher-room-code').value === TEACHER_CODE) {
-                show('page-teacher-dashboard'); initTeacherDashboard();
-            } else showModal("รหัสเข้าสู่ระบบไม่ถูกต้อง");
-        };
-        document.getElementById('btn-back-dashboard').onclick = () => { show('page-teacher-dashboard'); showDetailResults = false; };
+        // --- BINDING การเปลี่ยนหน้า (ตรวจสอบให้แน่ใจว่าผูกเหตุการณ์หลังโหลดเสร็จ) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
+            document.getElementById('btn-go-student').onclick = () => show('page-student-login');
+            document.getElementById('btn-teacher-login').onclick = () => {
+                if(document.getElementById('teacher-room-code').value === TEACHER_CODE) {
+                    show('page-teacher-dashboard'); initTeacherDashboard();
+                } else showModal("รหัสเข้าสู่ระบบไม่ถูกต้อง");
+            };
+            document.getElementById('btn-back-dashboard').onclick = () => { show('page-teacher-dashboard'); showDetailResults = false; };
+            
+            // ... (ผูกเหตุการณ์อื่นๆ เช่น btn-send-training, btn-dl-excel, ฯลฯ ถ้ามี)
+            document.getElementById('btn-send-training').onclick = sendToTrainingAPI;
+            document.getElementById('btn-dl-excel').onclick = downloadExcel;
+            document.getElementById('btn-clear-db').onclick = async () => { 
+                showModal("การล้างข้อมูล ต้องเข้าไปลบแถวใน Google Sheet โดยตรงครับ");
+            };
+            
+            // Student Login handlers
+            const studentIdInput = document.getElementById('student-id');
+            if(studentIdInput) {
+                studentIdInput.addEventListener('input', async (e) => { 
+                    const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
+                    try {
+                        const list = await fetchStudents(); 
+                        const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                        
+                        if(s) { 
+                            const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
+                            const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
+                            document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = deptStr; 
+                            document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
+                        } else {
+                            document.getElementById('student-preview').classList.add('hidden'); 
+                        }
+                    } catch(e) {}
+                });
+            }
+
+            document.getElementById('btn-student-login').onclick = handleStudentLogin;
+            document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
+            document.getElementById('btn-next').onclick = () => { if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); currentQIndex++; renderQuestion(); };
+            document.getElementById('btn-submit').onclick = handleSubmitExam;
+        });
 
         // --- TEACHER SYSTEM (ใช้ GAS 100%) ---
         function initTeacherDashboard() {
@@ -442,28 +545,33 @@
                 const res = await fetch(GAS_URL + "?t=" + new Date().getTime());
                 const data = await res.json();
                 
-                // อัปเดตสถานะการเปิดปิดระบบด้วย
-                if(data.systemIsOpen !== undefined && sysIsOpen !== data.systemIsOpen) {
-                    sysIsOpen = data.systemIsOpen;
-                    const sysCheckbox = document.getElementById('toggle-system');
-                    sysCheckbox.checked = sysIsOpen;
-                    const toggleBg = document.getElementById('toggle-bg');
-                    const toggleDot = document.getElementById('toggle-dot');
-                    const txtStatus = document.getElementById('txt-system-status');
-                    if(sysIsOpen) {
-                        toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
-                        toggleDot.classList.add('translate-x-6');
-                        txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
-                    } else {
-                        toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
-                        toggleDot.classList.remove('translate-x-6');
-                        txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+                if(data && data.students) {
+                    // อัปเดตสถานะการเปิดปิดระบบด้วย
+                    if(data.systemIsOpen !== undefined && sysIsOpen !== data.systemIsOpen) {
+                        sysIsOpen = data.systemIsOpen;
+                        const sysCheckbox = document.getElementById('toggle-system');
+                        sysCheckbox.checked = sysIsOpen;
+                        const toggleBg = document.getElementById('toggle-bg');
+                        const toggleDot = document.getElementById('toggle-dot');
+                        const txtStatus = document.getElementById('txt-system-status');
+                        if(sysIsOpen) {
+                            toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
+                            toggleDot.classList.add('translate-x-6');
+                            txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
+                        } else {
+                            toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
+                            toggleDot.classList.remove('translate-x-6');
+                            txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+                        }
                     }
-                }
 
-                // ข้อมูลนักเรียนทั้งหมด
-                if(data.students) {
                     allResults = data.students;
+                    renderGrid(); 
+                    updateLeaderboardAndFailList();
+                    if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
+                } else if(Array.isArray(data)) {
+                    // Fallback for older GAS format that returned array directly
+                    allResults = data;
                     renderGrid(); 
                     updateLeaderboardAndFailList();
                     if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
@@ -617,12 +725,8 @@
             }
         }
 
-        document.getElementById('btn-toggle-detail-results').onclick = () => { showDetailResults = !showDetailResults; renderQuestionDetail(); };
-        document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
-        document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < 39) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
-
         // --- SEND TO TRAINING WEB API ---
-        document.getElementById('btn-send-training').onclick = async () => {
+        async function sendToTrainingAPI() {
             const submitted = allResults.filter(s => s.status === 'submitted');
             if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
 
@@ -654,7 +758,7 @@
 
             btn.innerHTML = originalHtml; btn.disabled = false;
             showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
-        };
+        }
 
         // --- STUDENT SYSTEM (Google Sheets Auth & Update) ---
         async function fetchStudents() { 
@@ -669,22 +773,7 @@
             } catch (error) { throw error; }
         }
         
-        document.getElementById('student-id').addEventListener('input', async (e) => { 
-            const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
-            try {
-                const list = await fetchStudents(); 
-                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
-                
-                if(s) { 
-                    const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                    const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
-                    document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = deptStr; 
-                    document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
-                } else document.getElementById('student-preview').classList.add('hidden'); 
-            } catch(e) {}
-        });
-
-        document.getElementById('btn-student-login').onclick = async () => {
+        async function handleStudentLogin() {
             const btn = document.getElementById('btn-student-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
@@ -718,7 +807,13 @@
                     console.warn("Could not fetch initial GAS data", err);
                 }
 
-                const existing = gasDataObj.students ? gasDataObj.students.find(x => String(x.studentId) === exactId) : null;
+                let existing = null;
+                if (gasDataObj && gasDataObj.students) {
+                    existing = gasDataObj.students.find(x => String(x.studentId) === exactId);
+                } else if (Array.isArray(gasDataObj)) {
+                    existing = gasDataObj.find(x => String(x.studentId) === exactId);
+                }
+                
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
@@ -741,15 +836,16 @@
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, firstScore: currentStudent.firstScore, answers: new Array(40).fill(null)
                 };
-                fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
+                // Make the request async to not block but still ensure it fires
+                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
 
                 setupRandomQuestions(); 
                 
                 document.getElementById('exam-student-name').innerText = currentStudent.name; 
                 document.getElementById('exam-student-dept').innerText = currentStudent.dept;
                 renderQuestion(); show('page-student-exam');
-            } catch(e) { console.error(e); } finally { btn.innerHTML = originalText; btn.disabled = false; }
-        };
+            } catch(e) { console.error(e); showModal("เกิดข้อผิดพลาดในการเข้าสู่ระบบ"); } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
 
         function setupRandomQuestions() {
             let qs = MASTER_QUESTIONS.map((q, i) => ({ ...q, originalIndex: i }));
@@ -798,10 +894,7 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         };
         
-        document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
-        document.getElementById('btn-next').onclick = () => { if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); currentQIndex++; renderQuestion(); };
-        
-        document.getElementById('btn-submit').onclick = async () => {
+        async function handleSubmitExam() {
             if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาตอบข้อสุดท้าย");
             if(!confirm("ยืนยันส่งคำตอบ? (เมื่อส่งแล้วจะไม่สามารถแก้ไขได้อีก)")) return;
             
@@ -815,7 +908,7 @@
                 firstScore: currentStudent.firstScore !== undefined && currentStudent.firstScore !== null && currentStudent.firstScore !== "" ? currentStudent.firstScore : finalScore
             };
             
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             
             document.getElementById('submit-score-percent').innerText = finalScore.toFixed(0);
             document.getElementById('submit-score-correct').innerText = score;
@@ -831,22 +924,9 @@
                 document.getElementById('submit-title').className = "text-2xl font-black mb-6 text-red-600";
             }
             show('page-submitted');
-        };
-
-        function startCelebration() {
-            const container = document.getElementById('confetti-container');
-            const colors = ['#06b6d4', '#3b82f6', '#10b981', '#fbbf24'];
-            for (let i = 0; i < 150; i++) {
-                const el = document.createElement('div'); el.className = 'confetti';
-                el.style.background = colors[Math.floor(Math.random() * colors.length)];
-                el.style.left = Math.random() * 100 + 'vw';
-                el.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
-                el.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(el); setTimeout(() => el.remove(), 5000);
-            }
         }
 
-        document.getElementById('btn-dl-excel').onclick = () => {
+        function downloadExcel() {
             const data = allResults.map((s, i) => { 
                 const row = { "ลำดับ": i+1, "รหัส": s.studentId, "ชื่อ-สกุล": s.name, "แผนก": s.dept, "คะแนนครั้งแรก(%)": s.firstScore||0, "คะแนนล่าสุด(%)": s.score || 0 }; 
                 for (let idx = 0; idx < 40; idx++) {
@@ -856,11 +936,7 @@
                 return row; 
             });
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
-        };
-
-        document.getElementById('btn-clear-db').onclick = async () => { 
-            showModal("การล้างข้อมูล ต้องเข้าไปลบแถวใน Google Sheet โดยตรงครับ");
-        };
+        }
     </script>
 </body>
 </html>
