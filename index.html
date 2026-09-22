@@ -331,22 +331,22 @@
         </div>
     </div>
 
-    <!-- MAIN SCRIPT -->
+    <!-- MAIN SCRIPT (Zero Firebase & GAS Auth) -->
     <script>
         // ==============================================================
-        // ⚠️ ลิงก์ Google Apps Script สำหรับรับ/ส่งคะแนน (100% Zero Firebase)
+        // ⚠️ ลิงก์ Google Apps Script สำหรับรับ/ส่งคะแนน
         // ==============================================================
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwzB8pxVWrdSwhDkgwUWr2nN9k_3YcEUvOtcA7fFnbHz5UKaN1ksAAl0NTHRzfwUx3uSw/exec"; 
         
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
         const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/";
         const TEACHER_CODE = "056894";
         const PASS_SCORE = 80;
 
-        let sysIsOpen = true; // สถานะเริ่มต้นของระบบ (อ่านค่าจริงจาก GAS อีกที)
-        let currentStudent = null, studentCache = null, allResults = [], showAnswers = false, showNames = true;
+        // ตัวแปรส่วนกลาง
+        let currentStudent = null, allResults = [], showAnswers = false, showNames = true;
         let studentQuestions = [], studentAnswersMap = {}, currentQIndex = 0;
         let studentOptionOrders = {}, currentDetailQuestionIndex = 0, showDetailResults = false;
+        let sysIsOpen = true;
         let dashboardInterval = null;
 
         const MASTER_QUESTIONS = [
@@ -392,7 +392,7 @@
             { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/Q.jpg", opts: ["PCB (พีซีบี)", "Wafer (เวเฟอร์)", "Panel (พาเนล)", "Sheet (ซีส)"], a: 0 }
         ];
 
-        // --- GLOBAL UI FUNCTIONS ---
+        // Global functions
         window.forceReset = () => {
             if(confirm("ระบบจะล้างค่าการเชื่อมต่อเก่าในเครื่องนี้ ยืนยัน?")) {
                 localStorage.clear(); sessionStorage.clear();
@@ -417,73 +417,22 @@
             if(id === 'page-teacher-dashboard') document.getElementById(id).style.display = 'block';
         };
 
-        async function init() {
-            try {
-                // ดึงข้อมูลสถานะเริ่มต้นจาก Google Apps Script
-                const res = await fetch(GAS_URL + "?t=" + new Date().getTime());
-                const data = await res.json();
-                
-                // ตรวจสอบว่าระบบเปิดหรือปิดอยู่
-                if(data && data.systemIsOpen !== undefined) {
-                    sysIsOpen = data.systemIsOpen;
-                }
-            } catch(e) {
-                console.warn("ไม่สามารถดึงข้อมูลสถานะจาก Google Script ได้ (อาจติด CORS ของระบบทดสอบ หรือสิทธิ์การเข้าถึง):", e);
-                // กำหนดค่าเริ่มต้นให้เปิดระบบไว้ก่อน เพื่อให้สามารถเข้าระบบทดสอบต่อได้
-                sysIsOpen = true; 
-            } finally {
-                // ⚠️ บังคับปิดหน้าจอโหลดเสมอ ไม่ว่าจะเกิด Error หรือไม่
-                const loadingOverlay = document.getElementById('loading-overlay');
-                if (loadingOverlay) loadingOverlay.style.display = 'none';
-            }
+        function init() {
+            document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        // --- BINDING การเปลี่ยนหน้า (ตรวจสอบให้แน่ใจว่าผูกเหตุการณ์หลังโหลดเสร็จ) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
-            document.getElementById('btn-go-student').onclick = () => show('page-student-login');
-            document.getElementById('btn-teacher-login').onclick = () => {
-                if(document.getElementById('teacher-room-code').value === TEACHER_CODE) {
-                    show('page-teacher-dashboard'); initTeacherDashboard();
-                } else showModal("รหัสเข้าสู่ระบบไม่ถูกต้อง");
-            };
-            document.getElementById('btn-back-dashboard').onclick = () => { show('page-teacher-dashboard'); showDetailResults = false; };
-            
-            // ... (ผูกเหตุการณ์อื่นๆ เช่น btn-send-training, btn-dl-excel, ฯลฯ ถ้ามี)
-            document.getElementById('btn-send-training').onclick = sendToTrainingAPI;
-            document.getElementById('btn-dl-excel').onclick = downloadExcel;
-            document.getElementById('btn-clear-db').onclick = async () => { 
-                showModal("การล้างข้อมูล ต้องเข้าไปลบแถวใน Google Sheet โดยตรงครับ");
-            };
-            
-            // Student Login handlers
-            const studentIdInput = document.getElementById('student-id');
-            if(studentIdInput) {
-                studentIdInput.addEventListener('input', async (e) => { 
-                    const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
-                    try {
-                        const list = await fetchStudents(); 
-                        const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
-                        
-                        if(s) { 
-                            const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                            const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
-                            document.getElementById('preview-name').innerText = fullName; document.getElementById('preview-dept').innerText = deptStr; 
-                            document.getElementById('student-preview').classList.remove('hidden'); studentCache = list; 
-                        } else {
-                            document.getElementById('student-preview').classList.add('hidden'); 
-                        }
-                    } catch(e) {}
-                });
-            }
+        // --- BINDING ---
+        document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
+        document.getElementById('btn-go-student').onclick = () => show('page-student-login');
+        
+        document.getElementById('btn-teacher-login').onclick = () => {
+            if(document.getElementById('teacher-room-code').value === TEACHER_CODE) {
+                show('page-teacher-dashboard'); initTeacherDashboard();
+            } else showModal("รหัสเข้าสู่ระบบไม่ถูกต้อง");
+        };
+        document.getElementById('btn-back-dashboard').onclick = () => { show('page-teacher-dashboard'); showDetailResults = false; };
 
-            document.getElementById('btn-student-login').onclick = handleStudentLogin;
-            document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
-            document.getElementById('btn-next').onclick = () => { if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); currentQIndex++; renderQuestion(); };
-            document.getElementById('btn-submit').onclick = handleSubmitExam;
-        });
-
-        // --- TEACHER SYSTEM (ใช้ GAS 100%) ---
+        // --- TEACHER DASHBOARD ---
         function initTeacherDashboard() {
             const thead = document.getElementById('grid-header-row');
             thead.innerHTML = `<th class="p-3 border-b text-center sticky-col-1">#</th><th class="p-3 border-b text-center sticky-col-2 w-24">EN</th><th class="p-3 border-b min-w-[200px] sticky-col-3">ชื่อ-สกุล</th><th class="p-3 border-b text-center w-20">สถานะ</th><th class="p-3 border-b text-center w-16 font-black text-cyan-600">%</th>`;
@@ -493,40 +442,13 @@
                 th.innerText = i + 1; th.onclick = () => openQuestionDetail(i); thead.appendChild(th);
             });
 
-            const toggleBg = document.getElementById('toggle-bg');
-            const toggleDot = document.getElementById('toggle-dot');
-            const txtStatus = document.getElementById('txt-system-status');
             const sysCheckbox = document.getElementById('toggle-system');
-
-            // อัปเดต UI สวิตช์ตอนโหลดหน้าแรก
-            sysCheckbox.checked = sysIsOpen;
-            if(sysIsOpen) {
-                toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
-                toggleDot.classList.add('translate-x-6');
-                txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
-            } else {
-                toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
-                toggleDot.classList.remove('translate-x-6');
-                txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
-            }
-
+            
             sysCheckbox.addEventListener('change', async (e) => {
                 sysIsOpen = sysCheckbox.checked;
-                if(sysIsOpen) {
-                    toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
-                    toggleDot.classList.add('translate-x-6');
-                    txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
-                } else {
-                    toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
-                    toggleDot.classList.remove('translate-x-6');
-                    txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
-                }
-                
-                // ส่งคำสั่งเปิดปิดระบบไปเก็บที่ Google Sheet
+                updateToggleUI(sysIsOpen);
                 fetch(GAS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: "setSystemStatus", isOpen: sysIsOpen })
                 });
             });
@@ -535,8 +457,25 @@
             document.getElementById('toggle-names').onchange = () => renderGrid();
 
             fetchDashboardData();
-            // รีเฟรชข้อมูลแดชบอร์ดอัตโนมัติทุก 5 วินาที
             dashboardInterval = setInterval(fetchDashboardData, 5000);
+        }
+
+        function updateToggleUI(isOpen) {
+            const toggleBg = document.getElementById('toggle-bg');
+            const toggleDot = document.getElementById('toggle-dot');
+            const txtStatus = document.getElementById('txt-system-status');
+            const sysCheckbox = document.getElementById('toggle-system');
+            
+            sysCheckbox.checked = isOpen;
+            if(isOpen) {
+                toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
+                toggleDot.classList.add('translate-x-6');
+                txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
+            } else {
+                toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
+                toggleDot.classList.remove('translate-x-6');
+                txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
+            }
         }
 
         async function fetchDashboardData() {
@@ -545,37 +484,15 @@
                 const res = await fetch(GAS_URL + "?t=" + new Date().getTime());
                 const data = await res.json();
                 
-                if(data && data.students) {
-                    // อัปเดตสถานะการเปิดปิดระบบด้วย
-                    if(data.systemIsOpen !== undefined && sysIsOpen !== data.systemIsOpen) {
-                        sysIsOpen = data.systemIsOpen;
-                        const sysCheckbox = document.getElementById('toggle-system');
-                        sysCheckbox.checked = sysIsOpen;
-                        const toggleBg = document.getElementById('toggle-bg');
-                        const toggleDot = document.getElementById('toggle-dot');
-                        const txtStatus = document.getElementById('txt-system-status');
-                        if(sysIsOpen) {
-                            toggleBg.classList.replace('bg-slate-300', 'bg-emerald-500');
-                            toggleDot.classList.add('translate-x-6');
-                            txtStatus.textContent = 'เปิดรับคำตอบแล้ว'; txtStatus.classList.replace('text-slate-500', 'text-emerald-600');
-                        } else {
-                            toggleBg.classList.replace('bg-emerald-500', 'bg-slate-300');
-                            toggleDot.classList.remove('translate-x-6');
-                            txtStatus.textContent = 'ปิดรับคำตอบ'; txtStatus.classList.replace('text-emerald-600', 'text-slate-500');
-                        }
-                    }
-
-                    allResults = data.students;
-                    renderGrid(); 
-                    updateLeaderboardAndFailList();
-                    if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
-                } else if(Array.isArray(data)) {
-                    // Fallback for older GAS format that returned array directly
-                    allResults = data;
-                    renderGrid(); 
-                    updateLeaderboardAndFailList();
-                    if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
+                if(data.systemIsOpen !== undefined && sysIsOpen !== data.systemIsOpen) {
+                    sysIsOpen = data.systemIsOpen;
+                    updateToggleUI(sysIsOpen);
                 }
+
+                allResults = data.students || [];
+                renderGrid(); 
+                updateLeaderboardAndFailList();
+                if(document.getElementById('page-question-detail').style.display === 'flex') renderQuestionDetail();
             } catch(e) {
                 console.error("Error fetching dashboard data:", e);
             }
@@ -605,7 +522,6 @@
                 let scoreColor = (s.score !== null && s.score >= PASS_SCORE) ? 'text-emerald-600' : 'text-red-600';
                 tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score + '%' : '-'}</td>`;
                 
-                // วาดช่อง 40 ข้อเสมอ
                 for (let idx = 0; idx < 40; idx++) {
                     const ansIdx = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
                     let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold transition-all ";
@@ -725,95 +641,49 @@
             }
         }
 
-        // --- SEND TO TRAINING WEB API ---
-        async function sendToTrainingAPI() {
-            const submitted = allResults.filter(s => s.status === 'submitted');
-            if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
+        document.getElementById('btn-toggle-detail-results').onclick = () => { showDetailResults = !showDetailResults; renderQuestionDetail(); };
+        document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
+        document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < 39) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
 
-            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?`)) return;
-
-            const btn = document.getElementById('btn-send-training');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังส่ง...';
-            btn.disabled = true;
-
-            let successCount = 0; let failCount = 0;
-
-            for (const s of submitted) {
-                const payload = {
-                    employeeId: s.studentId, name: s.name, department: s.dept, courseName: "Basic Electronics",
-                    passScore: null, failScore: null
-                };
-
-                if (s.firstScore !== undefined && s.firstScore !== null && s.firstScore !== "" && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
-                    payload.passScore = s.score; payload.failScore = s.firstScore;
-                } else if (s.score >= PASS_SCORE) { payload.passScore = s.score; } 
-                else { payload.failScore = s.score; }
-
-                try {
-                    await fetch(TRAINING_WEB_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    successCount++;
-                } catch (error) { failCount++; }
-            }
-
-            btn.innerHTML = originalHtml; btn.disabled = false;
-            showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
-        }
-
-        // --- STUDENT SYSTEM (Google Sheets Auth & Update) ---
-        async function fetchStudents() { 
-            if(studentCache) return studentCache; 
-            try {
-                const res = await fetch(SHEET_URL, { cache: "no-store" }); 
-                if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
-                const csv = await res.text(); 
-                return new Promise((resolve, reject) => {
-                    Papa.parse(csv, { header:true, skipEmptyLines:true, complete: res => resolve(res.data), error: err => reject(err) });
-                });
-            } catch (error) { throw error; }
-        }
-        
-        async function handleStudentLogin() {
+        // --- STUDENT SYSTEM ---
+        document.getElementById('btn-student-login').onclick = async () => {
             const btn = document.getElementById('btn-student-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
 
             try {
-                // เช็คสถานะระบบก่อนเลยจากตัวแปรที่เก็บไว้
-                if(!sysIsOpen) { 
+                const rawId = document.getElementById('student-id').value.trim();
+                if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
+
+                // เช็คชื่อกับ GAS โดยตรง
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "checkStudent", studentId: rawId })
+                });
+                
+                const studentData = await res.json();
+                
+                if(!studentData.found) {
+                    return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
+                }
+
+                const exactId = studentData.exactEn;
+                const fullName = studentData.name;
+                const deptStr = studentData.dept;
+
+                // ดึงข้อมูลการสอบเดิมเพื่อเช็ค
+                let gasData = { systemIsOpen: true, students: [] };
+                try {
+                    const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
+                    gasData = await gasRes.json();
+                } catch(err) { console.warn("Fetch GAS error", err); }
+
+                if(!gasData.systemIsOpen) { 
                     showModal("ขณะนี้ระบบห้องสอบปิดรับคำตอบ\nโปรดรอประกาศจากผู้ควบคุม"); 
                     return; 
                 }
 
-                const rawId = document.getElementById('student-id').value.trim();
-                if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
-
-                let list;
-                try { list = await fetchStudents(); } catch(err) { showModal("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); return; }
-
-                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
-                if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
-
-                const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                const exactId = String(s['EN']).trim(); 
-                const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
-
-                // ดึงข้อมูลการสอบเดิมจาก GAS_URL
-                let gasDataObj = { systemIsOpen: true, students: [] };
-                try {
-                    const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
-                    gasDataObj = await gasRes.json();
-                } catch(err) {
-                    console.warn("Could not fetch initial GAS data", err);
-                }
-
-                let existing = null;
-                if (gasDataObj && gasDataObj.students) {
-                    existing = gasDataObj.students.find(x => String(x.studentId) === exactId);
-                } else if (Array.isArray(gasDataObj)) {
-                    existing = gasDataObj.find(x => String(x.studentId) === exactId);
-                }
-                
+                const existing = gasData.students.find(x => String(x.studentId) === exactId);
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
@@ -831,21 +701,26 @@
                     firstScore: previousData ? (previousData.firstScore !== undefined && previousData.firstScore !== null && previousData.firstScore !== "" ? previousData.firstScore : previousData.score) : undefined
                 };
                 
-                // แจ้งเตือนครูว่ามีคนล็อกอินเข้ามาทำ (ส่งข้อมูลไปสร้างบรรทัดใหม่ / หรืออัปเดต)
+                // แจ้ง GAS ว่ามีคนล็อกอิน
                 const initPayload = {
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, firstScore: currentStudent.firstScore, answers: new Array(40).fill(null)
                 };
-                // Make the request async to not block but still ensure it fires
-                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
+                
+                fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
 
                 setupRandomQuestions(); 
                 
                 document.getElementById('exam-student-name').innerText = currentStudent.name; 
                 document.getElementById('exam-student-dept').innerText = currentStudent.dept;
                 renderQuestion(); show('page-student-exam');
-            } catch(e) { console.error(e); showModal("เกิดข้อผิดพลาดในการเข้าสู่ระบบ"); } finally { btn.innerHTML = originalText; btn.disabled = false; }
-        }
+            } catch(e) { 
+                console.error(e);
+                showModal("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+            } finally { 
+                btn.innerHTML = originalText; btn.disabled = false; 
+            }
+        };
 
         function setupRandomQuestions() {
             let qs = MASTER_QUESTIONS.map((q, i) => ({ ...q, originalIndex: i }));
@@ -894,7 +769,10 @@
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         };
         
-        async function handleSubmitExam() {
+        document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
+        document.getElementById('btn-next').onclick = () => { if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); currentQIndex++; renderQuestion(); };
+        
+        document.getElementById('btn-submit').onclick = async () => {
             if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาตอบข้อสุดท้าย");
             if(!confirm("ยืนยันส่งคำตอบ? (เมื่อส่งแล้วจะไม่สามารถแก้ไขได้อีก)")) return;
             
@@ -905,10 +783,10 @@
             const payload = { 
                 studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept,
                 status: 'submitted', answers: masterArray, score: finalScore, 
-                firstScore: currentStudent.firstScore !== undefined && currentStudent.firstScore !== null && currentStudent.firstScore !== "" ? currentStudent.firstScore : finalScore
+                firstScore: currentStudent.firstScore !== undefined && currentStudent.firstScore !== null ? currentStudent.firstScore : finalScore
             };
             
-            await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             
             document.getElementById('submit-score-percent').innerText = finalScore.toFixed(0);
             document.getElementById('submit-score-correct').innerText = score;
@@ -924,9 +802,57 @@
                 document.getElementById('submit-title').className = "text-2xl font-black mb-6 text-red-600";
             }
             show('page-submitted');
+        };
+
+        function startCelebration() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#06b6d4', '#3b82f6', '#10b981', '#fbbf24'];
+            for (let i = 0; i < 150; i++) {
+                const el = document.createElement('div'); el.className = 'confetti';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                el.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(el); setTimeout(() => el.remove(), 5000);
+            }
         }
 
-        function downloadExcel() {
+        // --- SEND TO TRAINING WEB API ---
+        document.getElementById('btn-send-training').onclick = async () => {
+            const submitted = allResults.filter(s => s.status === 'submitted');
+            if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
+
+            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?`)) return;
+
+            const btn = document.getElementById('btn-send-training');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังส่ง...';
+            btn.disabled = true;
+
+            let successCount = 0; let failCount = 0;
+
+            for (const s of submitted) {
+                const payload = {
+                    employeeId: s.studentId, name: s.name, department: s.dept, courseName: "Basic Electronics",
+                    passScore: null, failScore: null
+                };
+
+                if (s.firstScore !== undefined && s.firstScore !== null && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
+                    payload.passScore = s.score; payload.failScore = s.firstScore;
+                } else if (s.score >= PASS_SCORE) { payload.passScore = s.score; } 
+                else { payload.failScore = s.score; }
+
+                try {
+                    await fetch(TRAINING_WEB_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    successCount++;
+                } catch (error) { failCount++; }
+            }
+
+            btn.innerHTML = originalHtml; btn.disabled = false;
+            showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
+        };
+
+        document.getElementById('btn-dl-excel').onclick = () => {
             const data = allResults.map((s, i) => { 
                 const row = { "ลำดับ": i+1, "รหัส": s.studentId, "ชื่อ-สกุล": s.name, "แผนก": s.dept, "คะแนนครั้งแรก(%)": s.firstScore||0, "คะแนนล่าสุด(%)": s.score || 0 }; 
                 for (let idx = 0; idx < 40; idx++) {
@@ -936,7 +862,12 @@
                 return row; 
             });
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
-        }
+        };
+
+        document.getElementById('btn-clear-db').onclick = async () => { 
+            showModal("การล้างข้อมูล ต้องเข้าไปลบแถวใน Google Sheet โดยตรงครับ");
+        };
+
     </script>
 </body>
 </html>
