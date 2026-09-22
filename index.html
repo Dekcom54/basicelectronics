@@ -63,13 +63,13 @@
             <div id="loading-log" class="text-sm text-gray-500 mb-6 font-mono">กำลังตรวจสอบระบบ...</div>
             <button id="btn-force-reset" onclick="forceReset()" class="hidden bg-red-500 text-white px-6 py-2 rounded-lg font-bold shadow-md mt-4">รีเซ็ตระบบ</button>
         </div>
-        
+        <!-- Modal -->
         <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[10000] flex justify-center items-center">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md text-center mx-4">
                 <div id="modal-icon" class="text-5xl mb-4">⚠️</div>
                 <h3 id="modal-title" class="text-xl font-bold mb-2">แจ้งเตือน</h3>
                 <p id="modal-message" class="text-gray-600 mb-6 text-sm"></p>
-                <button id="modal-close-btn" onclick="closeModal()" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl hover:bg-sky-700 font-bold">ตกลง</button>
+                <button id="modal-close-btn" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl hover:bg-sky-700 font-bold">ตกลง</button>
             </div>
         </div>
 
@@ -386,9 +386,20 @@
         let sysIsOpen = false;
         let dashboardInterval = null;
 
-        window.onload = function() {
+        // --- แก้ปัญหาปุ่ม Modal ---
+        // ผูก Event ให้ปุ่ม "ตกลง" โดยตรงผ่าน JavaScript แทนการใช้ onclick ใน HTML
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const closeModalBtn = document.getElementById('modal-close-btn');
+            if(closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    document.getElementById('message-modal').classList.add('hidden');
+                    document.getElementById('message-modal').classList.remove('flex');
+                });
+            }
+            // ปิดหน้าจอโหลดเมื่อพร้อม
             document.getElementById('loading-overlay').style.display = 'none';
-        }
+        });
+
 
         window.forceReset = () => {
             if(confirm("ระบบจะล้างค่าการเชื่อมต่อเก่าในเครื่องนี้ ยืนยัน?")) {
@@ -407,10 +418,6 @@
             document.getElementById('message-modal').classList.remove('hidden');
             document.getElementById('message-modal').classList.add('flex');
         };
-
-        function init() {
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
 
         const show = (id) => {
             document.querySelectorAll('.page').forEach(el => el.style.display = 'none');
@@ -726,7 +733,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
 
             try {
-                let gasDataObj = { systemIsOpen: true, students: [] };
+                // เช็คสถานะเปิดปิดระบบก่อนเลย
                 try {
                     const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
                     gasDataObj = await gasRes.json();
@@ -749,14 +756,12 @@
                 if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
 
                 const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || "ไม่ระบุชื่อ";
-                const exactId = String(s['EN']); 
+                // ใช้ค่า exactId โดยไม่สนใจเลข 0 ข้างหน้าเพื่อเปรียบเทียบง่ายขึ้น
+                const exactId = String(s['EN']).trim(); 
                 const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
 
-                let studentsList = [];
-                if (Array.isArray(gasDataObj.students)) { studentsList = gasDataObj.students; }
-                else if (Array.isArray(gasDataObj)) { studentsList = gasDataObj; }
-
-                const existing = studentsList.find(x => String(x.studentId) === exactId);
+                // เช็คประวัติการสอบจากก้อนข้อมูลที่โหลดมาแล้ว
+                const existing = gasDataObj.students ? gasDataObj.students.find(x => String(x.studentId).replace(/^0+/, '') === exactId.replace(/^0+/, '')) : null;
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
