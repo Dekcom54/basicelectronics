@@ -53,11 +53,10 @@
         }
     </style>
 </head>
-<body class="text-gray-800 relative">
+<body class="text-gray-800 relative" onload="init()">
 
     <div id="app" class="w-full min-h-screen flex flex-col relative z-10">
 
-        <!-- Loading Overlay -->
         <div id="loading-overlay">
             <div class="spinner mb-6"></div>
             <h2 class="text-sky-700 font-bold text-2xl mb-2">Basic Electronics</h2>
@@ -65,13 +64,12 @@
             <button id="btn-force-reset" onclick="forceReset()" class="hidden bg-red-500 text-white px-6 py-2 rounded-lg font-bold shadow-md mt-4">รีเซ็ตระบบ</button>
         </div>
         
-        <!-- Modal -->
         <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[10000] flex justify-center items-center">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md text-center mx-4">
                 <div id="modal-icon" class="text-5xl mb-4">⚠️</div>
                 <h3 id="modal-title" class="text-xl font-bold mb-2">แจ้งเตือน</h3>
                 <p id="modal-message" class="text-gray-600 mb-6 text-sm"></p>
-                <button id="modal-close-btn" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl hover:bg-sky-700 font-bold">ตกลง</button>
+                <button id="modal-close-btn" onclick="closeModal()" class="w-full bg-sky-600 text-white px-4 py-3 rounded-xl hover:bg-sky-700 font-bold">ตกลง</button>
             </div>
         </div>
 
@@ -169,7 +167,7 @@
                         </label>
                     </div>
                     <div class="h-px w-full bg-slate-100"></div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-1 gap-2">
                         <button id="btn-dl-excel" class="bg-emerald-500 text-white py-2 rounded-lg hover:bg-emerald-600 transition font-bold text-[10px] shadow-sm"><i class="fa-solid fa-file-excel"></i> Excel</button>
                         <button id="btn-send-training" class="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-bold text-[10px] shadow-sm"><i class="fa-solid fa-cloud-arrow-up"></i> ส่ง Web API</button>
                     </div>
@@ -332,18 +330,18 @@
         </div>
     </div>
 
-    <!-- MAIN SCRIPT (Google App Script Only) -->
     <script>
         // ==============================================================
-        // ⚠️ ลิงก์ Google Apps Script สำหรับรับ/ส่งคะแนน
+        // การตั้งค่าระบบ
         // ==============================================================
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwzB8pxVWrdSwhDkgwUWr2nN9k_3YcEUvOtcA7fFnbHz5UKaN1ksAAl0NTHRzfwUx3uSw/exec"; 
-        
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/10OZhC1HJ3nmX0enyIbELkUhN79ODA46gTZ4uqPwBeLU/export?format=csv&gid=0";
         const TRAINING_WEB_URL = "http://199.10.10.80/2026traingras/";
         const TEACHER_CODE = "056894";
         const PASS_SCORE = 80;
 
+        let sysIsOpen = false;
+        
         const MASTER_QUESTIONS = [
             { t: "อุปกรณ์ที่มีหน้าที่จำกัดการไหลของกระแสไฟฟ้าในวงจร คือ", opts: ["ขดลวด", "ตัวเก็บประจุ", "ตัวต้านทาน", "หม้อแปลง"], a: 2 }, 
             { t: "อุปกรณ์อิเล็กทรอนิกส์ชนิดใด ที่ทำหน้าที่คล้ายกับแหล่งจ่ายไฟฟ้าในวงจร สามารถเก็บ หรือ คายประจุได้", opts: ["ตัวต้านทาน", "ตัวเก็บประจุ", "ตัวเหนี่ยวนำ", "หม้อแปลง"], a: 1 }, 
@@ -382,11 +380,6 @@
             { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/L.jpg", opts: ["Switch (สวิทซ์)", "Connector (คอนเนกเตอร์)", "Socket (ซ็อกเก็ต)", "Terminal (เทอร์มินอล)"], a: 0 }, 
             { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/M.jpg", opts: ["Diode", "Transistor (ทรานซิสเตอร์)", "IC", "Regulator"], a: 1 }, 
             { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/N.jpg", opts: ["Switch (สวิทซ์)", "Connector (คอนเนกเตอร์)", "Header  (เฮดเดอร์)", "Pin (พิน)"], a: 1 }, 
-            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/O.jpg", opts: ["Resistor (รีซีสเตอร์)", "Diode (ไดโอด)", "Inductor (ชิบ อินดัคเตอร์)", "Fuse (ฟิวส์)"], a: 0 }, 
-            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/P.jpg", opts: ["light (ไลท์)", "Neon (นีออน)", "LED (หลอดเอลอีดี)", "Display (ดีสเพลย์)"], a: 2 }, 
-            { t: "จากรูปภาพ คืออุปกรณ์ชนิดใด?", img: "./images/Q.jpg", opts: ["PCB (พีซีบี)", "Wafer (เวเฟอร์)", "Panel (พาเนล)", "Sheet (ซีส)"], a: 0 }
-        ];
-
         let currentStudent = null, studentCache = null, allResults = [], showAnswers = false, showNames = true;
         let studentQuestions = [], studentAnswersMap = {}, currentQIndex = 0;
         let studentOptionOrders = {}, currentDetailQuestionIndex = 0, showDetailResults = false;
@@ -415,12 +408,15 @@
             document.getElementById('message-modal').classList.add('flex');
         };
 
+        function init() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
         const show = (id) => {
             document.querySelectorAll('.page').forEach(el => el.style.display = 'none');
             document.getElementById(id).style.display = 'flex';
             if(id === 'page-teacher-dashboard') document.getElementById(id).style.display = 'block';
         };
-
         // --- BINDING ---
         document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
         document.getElementById('btn-go-student').onclick = () => show('page-student-login');
@@ -480,6 +476,11 @@
                 const res = await fetch(GAS_URL + "?t=" + new Date().getTime());
                 const data = await res.json();
                 
+                if (data.error) {
+                    console.error("Error from GAS:", data.error);
+                    return;
+                }
+
                 // อัปเดตสถานะเปิดปิดระบบของครูตาม Sheet
                 sysIsOpen = data.systemIsOpen;
                 const sysCheckbox = document.getElementById('toggle-system');
@@ -533,10 +534,9 @@
                 
                 tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-cyan-200 bg-cyan-50 text-cyan-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
                 
-                let scoreColor = (s.score !== null && s.score >= PASS_SCORE && s.score !== "") ? 'text-emerald-600' : 'text-red-600';
-                tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${(s.score !== null && s.score !== "") ? s.score + '%' : '-'}</td>`;
+                let scoreColor = (s.score !== null && s.score >= PASS_SCORE) ? 'text-emerald-600' : 'text-red-600';
+                tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${s.score !== null ? s.score + '%' : '-'}</td>`;
                 
-                // วาดกล่องเช็คคำตอบ 40 ข้อเสมอ
                 for (let idx = 0; idx < 40; idx++) {
                     const ansIdx = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
                     let cls = "w-6 h-6 rounded-md mx-auto flex items-center justify-center text-[10px] font-bold transition-all ";
@@ -600,7 +600,6 @@
             }
         }
 
-        // --- QUESTION DETAILS ---
         function openQuestionDetail(index) {
             currentDetailQuestionIndex = index; showDetailResults = false;
             show('page-question-detail'); renderQuestionDetail();
@@ -660,7 +659,6 @@
         document.getElementById('btn-prev-q').onclick = () => { if(currentDetailQuestionIndex > 0) { currentDetailQuestionIndex--; showDetailResults = false; renderQuestionDetail(); }};
         document.getElementById('btn-next-q').onclick = () => { if(currentDetailQuestionIndex < 39) { currentDetailQuestionIndex++; showDetailResults = false; renderQuestionDetail(); }};
 
-        // --- SEND TO TRAINING WEB API ---
         document.getElementById('btn-send-training').onclick = async () => {
             const submitted = allResults.filter(s => s.status === 'submitted');
             if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
@@ -695,7 +693,6 @@
             showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
         };
 
-        // --- STUDENT SYSTEM (Google Sheets Auth) ---
         async function fetchStudents() { 
             if(studentCache) return studentCache; 
             try {
@@ -729,7 +726,6 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
 
             try {
-                // เช็คสถานะเปิดปิดระบบก่อนเลย
                 let gasDataObj = { systemIsOpen: true, students: [] };
                 try {
                     const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
@@ -756,8 +752,11 @@
                 const exactId = String(s['EN']); 
                 const deptStr = s['แผนก'] || s['DEPT'] || s['Department'] || "-";
 
-                // เช็คประวัติการสอบจากก้อนข้อมูลที่โหลดมาแล้ว
-                const existing = gasDataObj.students ? gasDataObj.students.find(x => String(x.studentId) === exactId) : null;
+                let studentsList = [];
+                if (Array.isArray(gasDataObj.students)) { studentsList = gasDataObj.students; }
+                else if (Array.isArray(gasDataObj)) { studentsList = gasDataObj; }
+
+                const existing = studentsList.find(x => String(x.studentId) === exactId);
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
@@ -775,7 +774,6 @@
                     firstScore: previousData ? (previousData.firstScore !== undefined && previousData.firstScore !== null && previousData.firstScore !== "" ? previousData.firstScore : previousData.score) : undefined
                 };
                 
-                // แจ้งเตือนครูว่ามีคนล็อกอินเข้ามาทำ (ส่งข้อมูลไปเซฟบรรทัดใหม่)
                 const initPayload = {
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, firstScore: currentStudent.firstScore, answers: new Array(40).fill(null)
@@ -828,18 +826,25 @@
 
         window.selectAnswer = async (val) => { 
             studentAnswersMap[studentQuestions[currentQIndex].originalIndex] = val; renderQuestion(); 
-            const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
-            
-            // ส่งข้อมูลกลับไปที่ Google Sheet ให้ครูเห็นแบบกึ่ง Real-time
-            const payload = {
-                studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept,
-                status: 'online', firstScore: currentStudent.firstScore, score: null, answers: masterArray
-            };
-            fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         };
         
-        document.getElementById('btn-prev').onclick = () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); }};
-        document.getElementById('btn-next').onclick = () => { if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); currentQIndex++; renderQuestion(); };
+        // Fire data to sheet ONLY when navigating or submitting to save DB load
+        const syncDataToSheet = () => {
+             const masterArray = new Array(40).fill(null); for(let i=0; i<40; i++) { if(studentAnswersMap[i] !== undefined) masterArray[i] = studentAnswersMap[i]; } 
+             const payload = {
+                studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept,
+                status: 'online', firstScore: currentStudent.firstScore, score: null, answers: masterArray
+             };
+             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        };
+
+        document.getElementById('btn-prev').onclick = () => { 
+            if(currentQIndex > 0) { currentQIndex--; renderQuestion(); syncDataToSheet(); }
+        };
+        document.getElementById('btn-next').onclick = () => { 
+            if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาเลือกคำตอบ"); 
+            currentQIndex++; renderQuestion(); syncDataToSheet();
+        };
         
         document.getElementById('btn-submit').onclick = async () => {
             if(studentAnswersMap[studentQuestions[currentQIndex].originalIndex] === undefined) return showModal("กรุณาตอบข้อสุดท้าย");
@@ -898,9 +903,6 @@
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
         };
 
-        document.getElementById('btn-clear-db').onclick = async () => { 
-            showModal("การล้างข้อมูล ต้องเข้าไปลบแถวใน Google Sheet โดยตรงครับ");
-        };
     </script>
 </body>
 </html>
