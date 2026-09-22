@@ -665,81 +665,86 @@
         document.getElementById('btn-send-training').onclick = async () => {
             const submitted = allResults.filter(s => s.status === 'submitted');
             if(submitted.length === 0) return showModal("ยังไม่มีข้อมูลพนักงานที่ส่งข้อสอบ");
-
-            if(!confirm(`ต้องการส่งข้อมูลผลสอบของพนักงาน ${submitted.length} คน ไปยังระบบ Training Record ใช่หรือไม่?`)) return;
-
-            const btn = document.getElementById('btn-send-training');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังส่ง...';
-            btn.disabled = true;
-
-            let successCount = 0; let failCount = 0;
-
-            for (const s of submitted) {
-                const payload = {
-                    employeeId: s.studentId, name: s.name, department: s.dept, courseName: "Basic Electronics",
-                    passScore: null, failScore: null
-                };
-
-                if (s.firstScore !== undefined && s.firstScore !== null && s.firstScore < PASS_SCORE && s.score >= PASS_SCORE) {
-                    payload.passScore = s.score; payload.failScore = s.firstScore;
-                } else if (s.score >= PASS_SCORE) { payload.passScore = s.score; } 
-                else { payload.failScore = s.score; }
-
-                try {
-                    await fetch(TRAINING_WEB_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    successCount++;
-                } catch (error) { failCount++; }
+        // --- STUDENT SYSTEM (การดึงรายชื่อแบบเดิมที่เสถียรสุด) ---
+        async function fetchStudents() { 
+            if(studentCache) return studentCache; 
+            try {
+                // ใช้ URL เดิมของคุณในการดึงข้อมูลเป็น CSV
+                const res = await fetch(SHEET_URL, { cache: "no-store" }); 
+                if(!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ Google Sheet ได้");
+                const csv = await res.text(); 
+                return new Promise((resolve, reject) => {
+                    Papa.parse(csv, { 
+                        header:true, 
+                        skipEmptyLines:true, 
+                        complete: res => resolve(res.data), 
+                        error: err => reject(err) 
+                    });
+                });
+            } catch (error) { throw error; }
+        }
+        
+        document.getElementById('student-id').addEventListener('input', async (e) => { 
+            const rawId = e.target.value.trim(); if(rawId.length < 3) return; 
+            try {
+                const list = await fetchStudents(); 
+                
+                // ค้นหาโดยไม่สนใจเลข 0 นำหน้า เพื่อความยืดหยุ่น
+                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                
+                if(s) { 
+                    // ตรวจสอบชื่อคอลัมน์ใหม่อีกครั้ง เผื่อมีการเปลี่ยนแปลง
+                    const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || s['Name'] || "ไม่ระบุชื่อ";
+                    const deptStr = s['Department'] || s['DEPT'] || s['แผนก'] || "-";
+                    
+                    document.getElementById('preview-name').innerText = fullName; 
+                    document.getElementById('preview-dept').innerText = deptStr; 
+                    document.getElementById('student-preview').classList.remove('hidden'); 
+                    studentCache = list; 
+                } else {
+                    document.getElementById('student-preview').classList.add('hidden'); 
+                }
+            } catch(e) {
+                console.warn("กำลังโหลดข้อมูลรายชื่อ...");
             }
-
-            btn.innerHTML = originalHtml; btn.disabled = false;
-            showModal(`ส่งข้อมูลเสร็จสิ้น\n\nสำเร็จ: ${successCount} รายการ\nล้มเหลว: ${failCount} รายการ`);
-        };
+        });
 
         document.getElementById('btn-student-login').onclick = async () => {
             const btn = document.getElementById('btn-student-login');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; 
-            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...'; btn.disabled = true;
 
             try {
-                // Check if system is open before allowing login
-                if(sysIsOpen === false) {
-                    showModal("ขณะนี้ระบบห้องสอบปิดรับคำตอบ\nโปรดรอประกาศจากผู้ควบคุม");
-                    return;
-                }
-
+                if(!sysIsOpen) { showModal("ขณะนี้ระบบห้องสอบยังไม่เปิดให้บริการ\nโปรดรอประกาศจากผู้ควบคุม"); return; }
                 const rawId = document.getElementById('student-id').value.trim();
                 if(!rawId) return showModal("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
 
-                // Call GAS to check student details
-                const checkRes = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: "checkStudent", studentId: rawId })
-                });
-                
-                const studentData = await checkRes.json();
-                
-                if(!studentData || !studentData.found) {
-                    return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
+                let list;
+                try { 
+                    list = await fetchStudents(); 
+                } catch(err) { 
+                    showModal("ไม่สามารถดึงข้อมูลรายชื่อได้\n(กรุณาตรวจสอบการแชร์ลิงก์ Sheet เป็นแบบ 'ทุกคนที่มีลิงก์' หรืออินเทอร์เน็ตของท่าน)"); 
+                    return; 
                 }
 
-                const exactId = studentData.exactEn;
-                const fullName = studentData.name;
-                const deptStr = studentData.dept;
+                // ค้นหารหัสพนักงาน
+                const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
+                if(!s) return showModal("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
 
-                // Load existing data to check if already submitted
-                const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
-                const gasData = await gasRes.json();
-                
-                // Update open status just in case
-                if (gasData.systemIsOpen !== undefined) sysIsOpen = gasData.systemIsOpen;
-                if(!sysIsOpen) {
-                    return showModal("ขณะนี้ระบบห้องสอบปิดรับคำตอบ\nโปรดรอประกาศจากผู้ควบคุม");
+                const fullName = s['NAME - SURNAME'] || s['ชื่อ- นามสกุล'] || s['Name'] || "ไม่ระบุชื่อ";
+                const exactId = String(s['EN']).trim(); 
+                const deptStr = s['Department'] || s['DEPT'] || s['แผนก'] || "-";
+
+                // ดึงข้อมูลการสอบเดิมจาก GAS_URL
+                let gasDataObj = { students: [] };
+                try {
+                    const gasRes = await fetch(GAS_URL + "?t=" + new Date().getTime());
+                    gasDataObj = await gasRes.json();
+                } catch(err) {
+                    console.warn("Could not fetch initial GAS data", err);
                 }
 
-                const existing = (gasData.students || []).find(x => String(x.studentId) === exactId);
+                const existing = gasDataObj.students.find(x => String(x.studentId) === exactId);
                 let previousData = null;
 
                 if(existing && existing.status === 'submitted') {
@@ -754,33 +759,28 @@
                 
                 currentStudent = { 
                     id: exactId, name: fullName, dept: deptStr, startTime: Date.now(),
-                    firstScore: previousData ? (previousData.firstScore !== undefined && previousData.firstScore !== null && previousData.firstScore !== "" ? previousData.firstScore : previousData.score) : undefined
+                    firstScore: previousData ? (previousData.firstScore !== undefined ? previousData.firstScore : previousData.score) : undefined
                 };
                 
+                // แจ้งเตือนครูว่ามีคนล็อกอินเข้ามาทำ
                 const initPayload = {
-                    action: "updateStudent",
                     studentId: currentStudent.id, name: currentStudent.name, dept: currentStudent.dept, 
                     status: 'online', score: null, firstScore: currentStudent.firstScore, answers: new Array(40).fill(null)
                 };
                 
-                await fetch(GAS_URL, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                    body: JSON.stringify(initPayload) 
-                });
+                // ยิงไปเซฟลง Sheet ว่าคนนี้ออนไลน์แล้ว
+                fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(initPayload) });
 
                 setupRandomQuestions(); 
                 
                 document.getElementById('exam-student-name').innerText = currentStudent.name; 
                 document.getElementById('exam-student-dept').innerText = currentStudent.dept;
-                renderQuestion(); 
-                show('page-student-exam');
+                renderQuestion(); show('page-student-exam');
             } catch(e) { 
                 console.error(e); 
-                showModal("เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล");
+                showModal("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
             } finally { 
-                btn.innerHTML = originalText; 
-                btn.disabled = false; 
+                btn.innerHTML = originalText; btn.disabled = false; 
             }
         };
 
