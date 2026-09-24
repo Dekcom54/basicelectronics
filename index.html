@@ -355,14 +355,19 @@
         const db = getDatabase(app);
         const basePath = `exam_sessions`;
 
+        // ปิดหน้าจอโหลดเมื่อพร้อม หรือถ้าค้างก็ปิดใน 1 วิ
         window.addEventListener('load', function() {
             setTimeout(function() {
                 var overlay = document.getElementById('loading-overlay');
                 if (overlay) overlay.style.display = 'none';
-            }, 800); 
+            }, 500); 
         });
+        setTimeout(function() {
+            var overlay = document.getElementById('loading-overlay');
+            if (overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
+        }, 1500);
 
-        // ดึงข้อมูลเก่าจาก Firebase 
+        // ดึงข้อมูลเด็กคนเดิม
         window.fbGetStudent = async (studentId) => {
             try {
                 const snapshot = await get(ref(db, basePath + '/' + studentId));
@@ -433,18 +438,6 @@
                 return false;
             }
         };
-
-        window.forceReset = () => {
-            if(confirm("ระบบจะล้างค่าการเชื่อมต่อเก่าในเครื่องนี้ ยืนยัน?")) {
-                localStorage.clear(); sessionStorage.clear();
-                window.location.reload(true);
-            }
-        };
-        
-        window.closeModal = () => {
-            document.getElementById('message-modal').classList.add('hidden');
-            document.getElementById('message-modal').classList.remove('flex');
-        };
     </script>
 
     <!-- MAIN SCRIPT (Logic Control) -->
@@ -503,6 +496,19 @@
         let studentOptionOrders = {}, currentDetailQuestionIndex = 0, showDetailResults = false;
         let sysIsOpen = false;
 
+        // ผูกปุ่มกดแจ้งเตือน
+        document.getElementById('modal-close-btn').onclick = () => {
+            document.getElementById('message-modal').classList.add('hidden');
+            document.getElementById('message-modal').classList.remove('flex');
+        };
+
+        window.forceReset = () => {
+            if(confirm("ระบบจะล้างค่าการเชื่อมต่อเก่าในเครื่องนี้ ยืนยัน?")) {
+                localStorage.clear(); sessionStorage.clear();
+                window.location.reload(true);
+            }
+        };
+
         const showModalMsg = (msg) => {
             document.getElementById('modal-message').innerText = msg;
             document.getElementById('message-modal').classList.remove('hidden');
@@ -514,11 +520,6 @@
             document.getElementById(id).style.display = 'flex';
             if(id === 'page-teacher-dashboard') document.getElementById(id).style.display = 'block';
         };
-
-        // ผูกปุ่มจาก HTML ไปยังฟังก์ชัน global
-        document.getElementById('modal-close-btn').addEventListener('click', () => {
-            if(window.closeModal) window.closeModal();
-        });
 
         // --- BINDING EVENTS ---
         document.getElementById('btn-go-teacher').onclick = () => show('page-teacher-login');
@@ -614,6 +615,28 @@
             }
         }
 
+        // โหลดคะแนนออกมาเป็น Excel ตามข้อมูลบนหน้าเว็บ
+        document.getElementById('btn-dl-excel').onclick = () => {
+            if (allResults.length === 0) return showModalMsg("ยังไม่มีข้อมูลสำหรับดาวน์โหลด");
+            
+            const data = allResults.map((s, i) => { 
+                const row = { 
+                    "ลำดับ": i+1, 
+                    "รหัส": s.studentId, 
+                    "ชื่อ-สกุล": s.name, 
+                    "แผนก": s.dept, 
+                    "คะแนนครั้งแรก(%)": (s.firstScore !== undefined && s.firstScore !== null && s.firstScore !== "") ? Math.round(Number(s.firstScore)) : "-", 
+                    "คะแนนล่าสุด(%)": (s.score !== null && s.score !== "") ? Math.round(Number(s.score)) : "-" 
+                }; 
+                for (let idx = 0; idx < 40; idx++) {
+                    const ans = (s.answers && s.answers.length > idx) ? s.answers[idx] : null;
+                    row[`ข้อ ${idx+1}`] = (ans === MASTER_QUESTIONS[idx].a) ? "ถูก" : (ans === null || ans === "" ? "ไม่ตอบ" : "ผิด"); 
+                }
+                return row; 
+            });
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Results"); XLSX.writeFile(wb, "Electronics_Exam_Results.xlsx");
+        };
+
         function renderGrid() {
             const showNames = document.getElementById('toggle-names').checked;
             const showAnswers = document.getElementById('toggle-answers').checked;
@@ -627,16 +650,19 @@
                 tr.innerHTML += `<td class="p-3 text-center text-slate-400 text-xs sticky-col-1 group-hover:bg-slate-50">${i+1}</td>`;
                 tr.innerHTML += `<td class="p-3 text-center font-mono font-bold text-slate-700 text-sm sticky-col-2 group-hover:bg-slate-50">${s.studentId}</td>`;
                 
+                let displayFirstScore = (s.firstScore !== undefined && s.firstScore !== null && s.firstScore !== "") ? Math.round(Number(s.firstScore)) : "";
+                
                 let nameHTML = `<div class="font-bold text-slate-800 text-sm">${showNames ? s.name : '***'}</div><div class="text-xs text-slate-400">${s.dept}</div>`;
-                if(s.firstScore !== undefined && s.firstScore !== null && s.firstScore !== s.score && s.firstScore !== "") {
-                    nameHTML += `<div class="text-[10px] text-orange-500 mt-0.5">เคยสอบได้: ${s.firstScore}%</div>`;
+                if(displayFirstScore !== "" && displayFirstScore !== Math.round(Number(s.score))) {
+                    nameHTML += `<div class="text-[10px] text-orange-500 mt-0.5">เคยสอบได้: ${displayFirstScore}%</div>`;
                 }
                 tr.innerHTML += `<td class="p-3 whitespace-nowrap sticky-col-3 group-hover:bg-slate-50">${nameHTML}</td>`;
                 
                 tr.innerHTML += `<td class="p-3 text-center">${s.status === 'submitted' ? '<span class="px-2 py-1 rounded border border-emerald-200 bg-emerald-50 text-emerald-600 text-[10px] font-bold">ส่งแล้ว</span>' : '<span class="px-2 py-1 rounded border border-cyan-200 bg-cyan-50 text-cyan-600 text-[10px] font-bold animate-pulse">กำลังทำ</span>'}</td>`;
                 
+                let displayScore = (s.score !== null && s.score !== "") ? Math.round(Number(s.score)) + '%' : '-';
                 let scoreColor = (s.score !== null && s.score >= PASS_SCORE && s.score !== "") ? 'text-emerald-600' : 'text-red-600';
-                tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${(s.score !== null && s.score !== "") ? s.score + '%' : '-'}</td>`;
+                tr.innerHTML += `<td class="p-3 text-center font-black ${scoreColor} text-sm">${displayScore}</td>`;
                 
                 for (let idx = 0; idx < 40; idx++) {
                     const ansIdx = (s.answers && s.answers.length > idx) ? s.answers[idx] : "";
@@ -678,7 +704,7 @@
                                 <div class="w-5 h-5 rounded-full bg-gradient-to-br ${colors[i]} flex items-center justify-center text-[10px] text-slate-900 font-bold">${icons[i]}</div>
                                 <span class="text-xs truncate max-w-[80px]">${s.name.split(' ')[0]}</span>
                             </div>
-                            <span class="text-xs font-bold text-cyan-400">${s.score}%</span>
+                            <span class="text-xs font-bold text-cyan-400">${Math.round(Number(s.score))}%</span>
                         </div>`;
                 });
             }
@@ -695,7 +721,7 @@
                                 <span class="text-xs font-bold">${s.studentId}</span>
                                 <span class="text-[10px] text-red-200">${s.name}</span>
                             </div>
-                            <span class="text-sm font-bold text-white">${s.score}%</span>
+                            <span class="text-sm font-bold text-white">${Math.round(Number(s.score))}%</span>
                         </div>`;
                 });
             }
@@ -837,28 +863,24 @@
 
                 if(!isSystemOpen) { 
                     showModalMsg("ขณะนี้ระบบห้องสอบปิดรับคำตอบ\nโปรดรอประกาศจากผู้ควบคุม"); 
-                    btn.innerHTML = originalText; btn.disabled = false;
                     return; 
                 }
 
                 const rawId = document.getElementById('student-id').value.trim();
                 if(!rawId) {
                     showModalMsg("กรุณากรอกรหัสประจำตัวพนักงาน (EN)");
-                    btn.innerHTML = originalText; btn.disabled = false;
                     return;
                 }
 
                 let list;
                 try { list = await fetchStudents(); } catch(err) { 
                     showModalMsg("ไม่สามารถเชื่อมต่อฐานข้อมูลรายชื่อได้"); 
-                    btn.innerHTML = originalText; btn.disabled = false;
                     return; 
                 }
 
                 const s = list.find(x => x['EN'] && String(x['EN']).replace(/^0+/, '') === rawId.replace(/^0+/, '')); 
                 if(!s) {
                     showModalMsg("ไม่พบข้อมูลพนักงานรหัสนี้ในระบบ (ตรวจสอบคอลัมน์ EN ใน Sheet)");
-                    btn.innerHTML = originalText; btn.disabled = false;
                     return;
                 }
 
@@ -873,12 +895,10 @@
                     if(existingData && existingData.status === 'submitted') {
                         const prevScore = Number(existingData.score);
                         if(prevScore >= PASS_SCORE) {
-                            showModalMsg(`คุณทำแบบทดสอบผ่านแล้วด้วยคะแนน ${prevScore}%\nไม่จำเป็นต้องสอบใหม่`);
-                            btn.innerHTML = originalText; btn.disabled = false;
+                            showModalMsg(`คุณทำแบบทดสอบผ่านแล้วด้วยคะแนน ${Math.round(prevScore)}%\nไม่จำเป็นต้องสอบใหม่`);
                             return;
                         } else {
-                            if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${prevScore}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) {
-                                btn.innerHTML = originalText; btn.disabled = false;
+                            if(!confirm(`คุณสอบไม่ผ่านในครั้งก่อนหน้า (ได้ ${Math.round(prevScore)}%)\nต้องการสอบแก้ตัวใหม่หรือไม่?`)) {
                                 return;
                             }
                             // เก็บ First Score เดิมเอาไว้ (ถ้ามีของเก่าใช้ของเก่า ถ้าไม่มีใช้คะแนนล่าสุด)
@@ -1004,7 +1024,7 @@
             // 2. ยิงเข้า Google Sheet เพื่อเก็บถาวร
             fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             
-            document.getElementById('submit-score-percent').innerText = finalScore.toFixed(0);
+            document.getElementById('submit-score-percent').innerText = Math.round(finalScore);
             document.getElementById('submit-score-correct').innerText = score;
             
             if(finalScore >= PASS_SCORE) {
